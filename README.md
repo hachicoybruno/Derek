@@ -81,10 +81,14 @@ Ver [`.env.example`](.env.example). Nunca subas claves al repositorio.
 |---|---|---|
 | `NEXT_PUBLIC_SUPABASE_URL` | Cliente y servidor | Sí |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Cliente y servidor | Sí (protegida por RLS) |
-| `SUPABASE_SECRET_KEY` | Solo `npm run seed` y tests de RLS | **No** |
+| `SUPABASE_SECRET_KEY` | Servidor: confirmar pagos, webhooks, alertas, equipo; también `npm run seed` | **No** |
 | `NEXT_PUBLIC_SITE_URL` | Enlaces de confirmación de correo y login con Google | Sí |
 | `ANUNCIOS_PROVEEDOR` | `plantillas` (por defecto) o `ia` | No |
 | `ANUNCIOS_IA_API_KEY` | Reservada para conectar IA al generador de anuncios | **No** |
+| `PAGOS_PROVEEDOR` | `paypal` o `simulado` (vacío = automático) | No |
+| `PAYPAL_ENTORNO` / `PAYPAL_CLIENT_ID` / `PAYPAL_CLIENT_SECRET` | Credenciales de la app de PayPal | **No** (el Client ID sí es público) |
+| `PAYPAL_WEBHOOK_ID` | Verificar la firma de los webhooks | **No** |
+| `PAYPAL_PLAN_BASICO` / `_PRO` / `_CONCESIONARIO` | IDs de los planes en PayPal | No |
 
 ## Base de datos
 
@@ -113,9 +117,29 @@ Las migraciones están en `supabase/migrations/`. Incluyen tablas, Row Level Sec
 ### 2. Vercel
 
 1. Importa el repositorio en [vercel.com/new](https://vercel.com/new) (framework: Next.js, sin cambios en el build).
-2. En **Settings → Environment Variables** agrega `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` y `NEXT_PUBLIC_SITE_URL` (la URL final de Vercel). `SUPABASE_SECRET_KEY` **no** es necesaria en Vercel.
+2. En **Settings → Environment Variables** agrega `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `NEXT_PUBLIC_SITE_URL` (la URL final de Vercel) y `SUPABASE_SECRET_KEY` (necesaria en el servidor para pagos, alertas y equipo; nunca con prefijo `NEXT_PUBLIC_`). Agrega también las variables de PayPal y de alertas (ver abajo).
 3. Deploy. `vercel.json` fija la región `gru1` (São Paulo), cerca de Lima y de Supabase `sa-east-1`.
 4. Si cambias el dominio, actualiza `NEXT_PUBLIC_SITE_URL` y las Redirect URLs de Supabase.
+
+## Pagos con PayPal (Fase 3)
+
+PayPal muestra dos botones: **PayPal** y **Tarjeta de débito o crédito** (sin cuenta PayPal). PayPal **no opera en soles**: los planes se cobran en US$ (S/ 49 ≈ US$ 13, S/ 119 ≈ US$ 32, S/ 249 ≈ US$ 67; ver `lib/planes.ts`).
+
+1. Crea una app en [developer.paypal.com](https://developer.paypal.com/dashboard/applications) (primero en *Sandbox*). Copia Client ID y Secret a `PAYPAL_CLIENT_ID` y `PAYPAL_CLIENT_SECRET`, con `PAYPAL_ENTORNO=sandbox`.
+2. Crea los planes: `npx tsx scripts/paypal-crear-planes.ts` y copia las líneas `PAYPAL_PLAN_*` que imprime.
+3. En la app de PayPal → **Webhooks** → *Add webhook*: URL `https://TU-DOMINIO/api/pagos/paypal/webhook`, eventos `BILLING.SUBSCRIPTION.*` y `PAYMENT.SALE.*`. Copia el *Webhook ID* a `PAYPAL_WEBHOOK_ID`.
+4. Prueba con una cuenta de comprador sandbox. Para producción repite con credenciales *Live* y `PAYPAL_ENTORNO=live`.
+
+**Sin credenciales de PayPal**, en desarrollo se usa el **proveedor simulado**: los botones dicen "(simulado)" y activan el plan sin cobrar. En producción el simulador está apagado salvo `PAGOS_PERMITIR_SIMULADO=true`.
+
+**Cambiar de proveedor** (Culqi, Mercado Pago, Stripe…): implementa `ProveedorPagos` (`lib/pagos/tipos.ts`) y regístralo en `lib/pagos/index.ts`.
+
+### Cómo probar la Fase 3
+
+1. Regístrate con un correo nuevo: verás "Te quedan 14 días de prueba gratis (plan Pro)".
+2. Toca la franja → **Elegir Básico** → "Pagar con tarjeta (simulado)". El plan queda activo.
+3. Registra 6 autos: el sexto muestra el límite del Básico. El dashboard muestra "5 / 5" y las funciones Pro bloqueadas.
+4. **Cambiar a Pro** → pagar → límites quitados. Luego **Cancelar suscripción**: sigues con acceso hasta fin de periodo.
 
 ## Estructura
 

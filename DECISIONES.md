@@ -64,3 +64,21 @@ Registro de decisiones tomadas cuando algo era ambiguo. Se eligió siempre la op
 | D10 | **Fuentes estándar del PDF (Helvetica):** cubren tildes, ñ, ¿ ¡ y °. Los emojis y símbolos fuera de Latin-1 se eliminan al generar el PDF. |
 | D11 | **El último párrafo nunca queda separado de las firmas;** si no entran juntos, pasan a la página siguiente. |
 | D12 | **La vista previa del editor usa datos ficticios** y el texto aún sin guardar. |
+
+## Fase 3 — Monetización
+
+| # | Decisión |
+|---|----------|
+| P1 | **PayPal como proveedor** (pedido del usuario): un solo proveedor con dos botones, *PayPal* y *Tarjeta de débito o crédito* (el pago con tarjeta lo procesa PayPal, sin cuenta PayPal). |
+| P2 | **Cobro en US$:** PayPal no opera en soles. Se muestra el precio en soles y debajo el cobro en dólares (S/ 49 → US$ 13, S/ 119 → US$ 32, S/ 249 → US$ 67, a ~3.75). Para cobrar tarjetas en soles habría que sumar Culqi o Mercado Pago detrás de la misma interfaz. |
+| P3 | **Interfaz `ProveedorPagos`** (`obtenerSuscripcion`, `cancelar`, `verificarWebhook`). El servicio de suscripciones no conoce al proveedor. |
+| P4 | **Proveedor simulado** para desarrollo y demos (no cobra). Apagado en producción salvo `PAGOS_PERMITIR_SIMULADO=true`. |
+| P5 | **La confirmación no confía en el navegador:** el servidor consulta la suscripción en PayPal y valida que `custom_id` sea el usuario actual y que el plan exista. |
+| P6 | **Webhooks idempotentes** (tabla `eventos_pago`), firma verificada con la API de PayPal, y siempre se vuelve a consultar el estado real de la suscripción (los eventos pueden llegar desordenados). Si falla el proceso se responde 500 para que PayPal reintente. |
+| P7 | **Prueba de 14 días con funciones Pro,** sin tarjeta. Si se suscribe durante la prueba, el cobro empieza ese día. |
+| P8 | **Sin plan vigente (prueba o suscripción terminada):** se puede ver, editar, vender y exportar todo; no se pueden agregar autos ni pasar autos a stock. Los datos nunca se borran. |
+| P9 | **Básico = 5 autos en stock** (en stock + reservados; "en evaluación" no cuenta, ver N1). Sin alertas de vencimiento y con dashboard reducido (ganancia del mes y autos en stock). |
+| P10 | **Los límites se validan en la base de datos** (trigger `validar_limite_plan`) además de en la interfaz, para que no se salten llamando a la API de Supabase directamente. El usuario solo puede leer su suscripción y sus pagos. |
+| P11 | **Cambio de plan = nueva suscripción;** al activarse, la anterior se cancela en PayPal automáticamente. No se prorratea. |
+| P12 | **Cancelar** mantiene el acceso hasta el fin del periodo pagado. Hay 5 días de gracia si un webhook de renovación llega tarde. |
+| P13 | **Concesionario = hasta 5 usuarios** (dueño + vendedores), implementado en la Fase 4. |

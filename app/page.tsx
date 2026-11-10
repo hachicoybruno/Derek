@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Bell, Calculator, CarFront, FileSpreadsheet, Megaphone, Wallet } from "lucide-react";
 import { Logo } from "@/components/logo";
 import { BotonLink } from "@/components/ui";
+import { TablaPrecios } from "@/components/precios";
 
 // Landing básica (Fase 1). La versión completa con precios y preguntas frecuentes llega después.
 
@@ -84,6 +85,22 @@ export default function Landing() {
               </li>
             ))}
           </ul>
+        </section>
+
+        <section id="precios" className="bg-slate-50 px-5 py-12" aria-labelledby="titulo-precios">
+          <div className="mx-auto max-w-5xl space-y-8">
+            <div className="text-center">
+              <h2 id="titulo-precios" className="text-2xl font-bold">Precios simples, en soles</h2>
+              <p className="text-slate-600">Paga con PayPal o con tu tarjeta de débito o crédito.</p>
+            </div>
+            <TablaPrecios
+              accion={(id) => (
+                <BotonLink href="/registro" variante={id === "pro" ? "primario" : "secundario"} className="w-full">
+                  Probar gratis 14 días
+                </BotonLink>
+              )}
+            />
+          </div>
         </section>
 
         <section className="bg-marca-800 px-5 py-12 text-center text-white">

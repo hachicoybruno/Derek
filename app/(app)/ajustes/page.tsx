@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { FileText, LogOut } from "lucide-react";
+import { CreditCard, FileText, LogOut } from "lucide-react";
 import { BotonDatosEjemplo } from "@/components/boton-datos-ejemplo";
 import { BotonEnviar } from "@/components/boton-enviar";
 import { BotonLink, Seccion, Tarjeta } from "@/components/ui";
@@ -28,6 +28,12 @@ export default async function Ajustes() {
           }}
         />
       </Tarjeta>
+
+      <Seccion titulo="Suscripción">
+        <BotonLink href="/suscripcion" variante="secundario" className="w-full">
+          <CreditCard className="size-5" aria-hidden /> Ver mi plan y pagos
+        </BotonLink>
+      </Seccion>
 
       <Seccion titulo="Documentos">
         <BotonLink href="/plantillas" variante="secundario" className="w-full">
