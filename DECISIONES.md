@@ -99,3 +99,12 @@ Registro de decisiones tomadas cuando algo era ambiguo. Se eligió siempre la op
 | E10 | **Correo con Resend y WhatsApp con la Cloud API de Meta**, detrás de interfaces (`EnviadorCorreo`, `EnviadorWhatsapp`). WhatsApp exige una plantilla aprobada; el resumen va en un parámetro de una línea (máx. 3 documentos y "y N más"). |
 | E11 | **Las alertas van solo al dueño** (correo de la cuenta o uno alternativo, y un celular). Los vendedores ven los vencimientos en la app. |
 | E12 | **Celulares:** se acepta "987 654 321" y se guarda como `+51987654321` (Perú por defecto). |
+
+## Landing
+
+| # | Decisión |
+|---|----------|
+| L1 | **Página estática** (sin leer sesión) para que cargue rápido; el que ya tiene sesión entra con "Entrar". |
+| L2 | **Capturas reales** de la app con los datos de ejemplo, en WebP de ~35 KB cada una (`public/capturas`). Para actualizarlas, toma nuevas capturas de 390 px de ancho. |
+| L3 | **Ejemplo en soles** con los mismos números del auto de ejemplo (Yaris: S/ 6,500 aparentes vs S/ 5,170 reales). |
+| L4 | **Preguntas frecuentes** con `<details>` (sin JavaScript) e incluyen el cobro en US$ de PayPal, la validez de contratos (notario/SUNARP) y que no se extraen datos de otras páginas. |
