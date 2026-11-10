@@ -13,6 +13,8 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
     "lib/supabase/tipos-db.ts",
+    // Producción de vídeo independiente de la app (scripts de Node sueltos):
+    "planeta-cero/**",
   ]),
 ]);
 

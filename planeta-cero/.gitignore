@@ -1,0 +1,4 @@
+# vídeo y audio generados (se regeneran con los comandos del README)
+salida/*.mp4
+salida/*.wav
+previa.png
