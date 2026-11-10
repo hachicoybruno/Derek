@@ -2,7 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { supabaseEnv } from "./env";
 
-const RUTAS_PRIVADAS = ["/dashboard", "/autos", "/calculadora", "/vencimientos", "/ajustes"];
+const RUTAS_PRIVADAS = ["/dashboard", "/autos", "/calculadora", "/vencimientos", "/ajustes", "/plantillas"];
 const RUTAS_AUTH = ["/login", "/registro"];
 
 function empiezaCon(path: string, rutas: string[]) {

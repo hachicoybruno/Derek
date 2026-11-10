@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { LogOut } from "lucide-react";
+import { FileText, LogOut } from "lucide-react";
 import { BotonDatosEjemplo } from "@/components/boton-datos-ejemplo";
 import { BotonEnviar } from "@/components/boton-enviar";
-import { Seccion, Tarjeta } from "@/components/ui";
+import { BotonLink, Seccion, Tarjeta } from "@/components/ui";
 import { obtenerPerfil } from "@/lib/datos";
 import { cerrarSesion } from "../../(auth)/acciones";
 import { FormularioAjustes } from "./formulario-ajustes";
@@ -28,6 +28,12 @@ export default async function Ajustes() {
           }}
         />
       </Tarjeta>
+
+      <Seccion titulo="Documentos">
+        <BotonLink href="/plantillas" variante="secundario" className="w-full">
+          <FileText className="size-5" aria-hidden /> Editar plantillas de contrato, recibo y entrega
+        </BotonLink>
+      </Seccion>
 
       <Seccion titulo="Datos de ejemplo">
         <Tarjeta className="space-y-3">
