@@ -25,14 +25,14 @@ export type Database = {
           Tables: {
             "autos": {
                   Row: {
-                    "anio": number,"color": string | null,"combustible": string | null,"comprador_id": string | null,"created_at": string,"estado": string,"fecha_compra": string | null,"fecha_venta": string | null,"id": string,"kilometraje": number | null,"marca": string,"modelo": string,"notas": string | null,"placa": string,"precio_compra": number | null,"precio_venta_final": number | null,"precio_venta_objetivo": number | null,"transmision": string | null,"updated_at": string,"user_id": string,"vendedor_id": string | null,"version": string | null
+                    "anio": number,"color": string | null,"combustible": string | null,"comprador_id": string | null,"created_at": string,"estado": string,"fecha_compra": string | null,"fecha_venta": string | null,"id": string,"kilometraje": number | null,"marca": string,"modelo": string,"notas": string | null,"numero_motor": string | null,"numero_serie": string | null,"placa": string,"precio_compra": number | null,"precio_venta_final": number | null,"precio_venta_objetivo": number | null,"transmision": string | null,"updated_at": string,"user_id": string,"vendedor_id": string | null,"version": string | null
                   }
                   ComputedFields: never
                   Insert: {
-                    "anio": number,"color"?: string | null,"combustible"?: string | null,"comprador_id"?: string | null,"created_at"?: string,"estado"?: string,"fecha_compra"?: string | null,"fecha_venta"?: string | null,"id"?: string,"kilometraje"?: number | null,"marca": string,"modelo": string,"notas"?: string | null,"placa": string,"precio_compra"?: number | null,"precio_venta_final"?: number | null,"precio_venta_objetivo"?: number | null,"transmision"?: string | null,"updated_at"?: string,"user_id"?: string,"vendedor_id"?: string | null,"version"?: string | null
+                    "anio": number,"color"?: string | null,"combustible"?: string | null,"comprador_id"?: string | null,"created_at"?: string,"estado"?: string,"fecha_compra"?: string | null,"fecha_venta"?: string | null,"id"?: string,"kilometraje"?: number | null,"marca": string,"modelo": string,"notas"?: string | null,"numero_motor"?: string | null,"numero_serie"?: string | null,"placa": string,"precio_compra"?: number | null,"precio_venta_final"?: number | null,"precio_venta_objetivo"?: number | null,"transmision"?: string | null,"updated_at"?: string,"user_id"?: string,"vendedor_id"?: string | null,"version"?: string | null
                   }
                   Update: {
-                    "anio"?: number,"color"?: string | null,"combustible"?: string | null,"comprador_id"?: string | null,"created_at"?: string,"estado"?: string,"fecha_compra"?: string | null,"fecha_venta"?: string | null,"id"?: string,"kilometraje"?: number | null,"marca"?: string,"modelo"?: string,"notas"?: string | null,"placa"?: string,"precio_compra"?: number | null,"precio_venta_final"?: number | null,"precio_venta_objetivo"?: number | null,"transmision"?: string | null,"updated_at"?: string,"user_id"?: string,"vendedor_id"?: string | null,"version"?: string | null
+                    "anio"?: number,"color"?: string | null,"combustible"?: string | null,"comprador_id"?: string | null,"created_at"?: string,"estado"?: string,"fecha_compra"?: string | null,"fecha_venta"?: string | null,"id"?: string,"kilometraje"?: number | null,"marca"?: string,"modelo"?: string,"notas"?: string | null,"numero_motor"?: string | null,"numero_serie"?: string | null,"placa"?: string,"precio_compra"?: number | null,"precio_venta_final"?: number | null,"precio_venta_objetivo"?: number | null,"transmision"?: string | null,"updated_at"?: string,"user_id"?: string,"vendedor_id"?: string | null,"version"?: string | null
                   }
                   Relationships: [
                     {
@@ -143,14 +143,28 @@ isOneToOne: false
                   ]
                 },"perfiles": {
                   Row: {
-                    "created_at": string,"id": string,"negocio": string | null,"nombre": string | null,"umbral_amarillo": number,"umbral_verde": number,"updated_at": string
+                    "ciudad": string,"created_at": string,"direccion": string | null,"dni": string | null,"id": string,"negocio": string | null,"nombre": string | null,"telefono": string | null,"umbral_amarillo": number,"umbral_verde": number,"updated_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "created_at"?: string,"id": string,"negocio"?: string | null,"nombre"?: string | null,"umbral_amarillo"?: number,"umbral_verde"?: number,"updated_at"?: string
+                    "ciudad"?: string,"created_at"?: string,"direccion"?: string | null,"dni"?: string | null,"id": string,"negocio"?: string | null,"nombre"?: string | null,"telefono"?: string | null,"umbral_amarillo"?: number,"umbral_verde"?: number,"updated_at"?: string
                   }
                   Update: {
-                    "created_at"?: string,"id"?: string,"negocio"?: string | null,"nombre"?: string | null,"umbral_amarillo"?: number,"umbral_verde"?: number,"updated_at"?: string
+                    "ciudad"?: string,"created_at"?: string,"direccion"?: string | null,"dni"?: string | null,"id"?: string,"negocio"?: string | null,"nombre"?: string | null,"telefono"?: string | null,"umbral_amarillo"?: number,"umbral_verde"?: number,"updated_at"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"plantillas": {
+                  Row: {
+                    "contenido": string,"created_at": string,"id": string,"tipo": string,"updated_at": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "contenido": string,"created_at"?: string,"id"?: string,"tipo": string,"updated_at"?: string,"user_id"?: string
+                  }
+                  Update: {
+                    "contenido"?: string,"created_at"?: string,"id"?: string,"tipo"?: string,"updated_at"?: string,"user_id"?: string
                   }
                   Relationships: [
                     
@@ -160,7 +174,7 @@ isOneToOne: false
           Views: {
             "autos_resumen": {
                   Row: {
-                    "anio": number,"color": string | null,"combustible": string | null,"comprador_id": string | null,"created_at": string,"estado": string,"fecha_compra": string | null,"fecha_venta": string | null,"id": string,"kilometraje": number | null,"marca": string,"modelo": string,"notas": string | null,"placa": string,"precio_compra": number | null,"precio_venta_final": number | null,"precio_venta_objetivo": number | null,"total_gastos": number | null,"transmision": string | null,"updated_at": string,"user_id": string,"vendedor_id": string | null,"version": string | null
+                    "anio": number,"color": string | null,"combustible": string | null,"comprador_id": string | null,"created_at": string,"estado": string,"fecha_compra": string | null,"fecha_venta": string | null,"id": string,"kilometraje": number | null,"marca": string,"modelo": string,"notas": string | null,"numero_motor": string | null,"numero_serie": string | null,"placa": string,"precio_compra": number | null,"precio_venta_final": number | null,"precio_venta_objetivo": number | null,"total_gastos": number | null,"transmision": string | null,"updated_at": string,"user_id": string,"vendedor_id": string | null,"version": string | null
                   }
                   ComputedFields: never
                   Relationships: [

@@ -242,6 +242,8 @@ export default async function FichaAuto({ params, searchParams }: PageProps<"/au
             <Dato etiqueta="Transmisión" valor={auto.transmision ? ETIQUETA_TRANSMISION[auto.transmision as "mecanica"] : null} />
             <Dato etiqueta="Combustible" valor={auto.combustible ? ETIQUETA_COMBUSTIBLE[auto.combustible as "gasolina"] : null} />
             <Dato etiqueta="Fecha de compra" valor={fecha(auto.fecha_compra)} />
+            <Dato etiqueta="N° de serie (VIN)" valor={auto.numero_serie} />
+            <Dato etiqueta="N° de motor" valor={auto.numero_motor} />
             {auto.notas && <Dato etiqueta="Notas" valor={<span className="font-normal whitespace-pre-line">{auto.notas}</span>} className="col-span-full" />}
           </dl>
         </Tarjeta>

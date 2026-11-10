@@ -38,7 +38,9 @@ export function FormularioAuto({
   );
   const opcionesEstado: Estado[] = editando ? ["en_evaluacion", "en_stock", "reservado", "vendido"] : ["en_stock", "en_evaluacion", "reservado"];
   const comprado = estadoAuto !== "en_evaluacion";
-  const tieneMasDatos = Boolean(auto?.version || auto?.color || auto?.kilometraje || auto?.transmision || auto?.combustible || auto?.notas);
+  const tieneMasDatos = Boolean(
+    auto?.version || auto?.color || auto?.kilometraje || auto?.transmision || auto?.combustible || auto?.notas || auto?.numero_serie || auto?.numero_motor,
+  );
 
   return (
     <form action={accion} className="space-y-5" noValidate>
@@ -160,6 +162,12 @@ export function FormularioAuto({
                 <option key={c} value={c}>{ETIQUETA_COMBUSTIBLE[c]}</option>
               ))}
             </Selector>
+          </Campo>
+          <Campo etiqueta="N° de serie (VIN)" ayuda="Para contratos">
+            <Entrada name="numero_serie" autoCapitalize="characters" autoComplete="off" maxLength={30} className="uppercase" defaultValue={v("numero_serie")} />
+          </Campo>
+          <Campo etiqueta="N° de motor" ayuda="Para contratos">
+            <Entrada name="numero_motor" autoCapitalize="characters" autoComplete="off" maxLength={30} className="uppercase" defaultValue={v("numero_motor")} />
           </Campo>
           <Campo etiqueta="Notas" className="col-span-2">
             <AreaTexto name="notas" rows={3} placeholder="Detalles del auto, estado de llantas, choques…" defaultValue={v("notas")} />

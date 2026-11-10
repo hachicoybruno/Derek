@@ -5,7 +5,17 @@ import { Aviso, Campo, Entrada } from "@/components/ui";
 import type { EstadoFormulario } from "../autos/acciones";
 import { guardarAjustes } from "./acciones";
 
-type Perfil = { nombre: string | null; negocio: string | null; umbral_verde: number; umbral_amarillo: number };
+export type PerfilAjustes = {
+  nombre: string | null;
+  negocio: string | null;
+  dni: string | null;
+  telefono: string | null;
+  direccion: string | null;
+  ciudad: string | null;
+  umbral_verde: number;
+  umbral_amarillo: number;
+};
+type Perfil = PerfilAjustes;
 
 export function FormularioAjustes({ perfil }: { perfil: Perfil }) {
   const [estado, accion] = useActionState<EstadoFormulario, FormData>(guardarAjustes, {});
@@ -15,13 +25,32 @@ export function FormularioAjustes({ perfil }: { perfil: Perfil }) {
   return (
     <form action={accion} className="space-y-5" noValidate>
       <div className="grid gap-3 sm:grid-cols-2">
-        <Campo etiqueta="Tu nombre">
+        <Campo etiqueta="Tu nombre completo" ayuda="Así aparecerá en contratos y recibos.">
           <Entrada name="nombre" defaultValue={v("nombre")} autoComplete="name" />
         </Campo>
         <Campo etiqueta="Nombre del negocio (opcional)">
           <Entrada name="negocio" defaultValue={v("negocio")} placeholder="Ej. Autos Andree" />
         </Campo>
       </div>
+
+      <fieldset className="space-y-3">
+        <legend className="font-bold">Tus datos para contratos y recibos</legend>
+        <p className="text-sm text-slate-600">Aparecen cuando tú figuras como vendedor. Puedes dejarlos vacíos y llenarlos a mano.</p>
+        <div className="grid grid-cols-2 gap-3">
+          <Campo etiqueta="DNI / CE / RUC" error={e.dni}>
+            <Entrada name="dni" inputMode="numeric" maxLength={15} defaultValue={v("dni")} aria-invalid={Boolean(e.dni)} />
+          </Campo>
+          <Campo etiqueta="Teléfono">
+            <Entrada name="telefono" type="tel" inputMode="tel" defaultValue={v("telefono")} />
+          </Campo>
+          <Campo etiqueta="Dirección" className="col-span-2">
+            <Entrada name="direccion" defaultValue={v("direccion")} placeholder="Av. …, distrito" />
+          </Campo>
+          <Campo etiqueta="Ciudad (para la firma y la jurisdicción)" className="col-span-2">
+            <Entrada name="ciudad" defaultValue={v("ciudad") || "Lima"} />
+          </Campo>
+        </div>
+      </fieldset>
 
       <fieldset className="space-y-3">
         <legend className="font-bold">Semáforo de la calculadora</legend>

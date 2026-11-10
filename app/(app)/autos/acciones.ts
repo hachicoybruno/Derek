@@ -41,6 +41,8 @@ function esquemaAuto(hoy: string) {
       transmision: opcionDe(TRANSMISIONES),
       combustible: opcionDe(COMBUSTIBLES),
       notas: textoOpcional(2000),
+      numero_serie: textoOpcional(30),
+      numero_motor: textoOpcional(30),
     })
     .superRefine((d, ctx) => {
       const comprado = d.estado !== "en_evaluacion";
@@ -93,6 +95,8 @@ export async function guardarAuto(_: EstadoFormulario, formData: FormData): Prom
     transmision: d.transmision ?? null,
     combustible: d.combustible ?? null,
     notas: d.notas ?? null,
+    numero_serie: d.numero_serie?.toUpperCase() ?? null,
+    numero_motor: d.numero_motor?.toUpperCase() ?? null,
   };
 
   let autoId: string;

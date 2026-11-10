@@ -19,6 +19,10 @@ export default async function Ajustes() {
           perfil={{
             nombre: perfil.nombre ?? null,
             negocio: perfil.negocio ?? null,
+            dni: perfil.dni ?? null,
+            telefono: perfil.telefono ?? null,
+            direccion: perfil.direccion ?? null,
+            ciudad: perfil.ciudad ?? "Lima",
             umbral_verde: Number(perfil.umbral_verde ?? 15),
             umbral_amarillo: Number(perfil.umbral_amarillo ?? 8),
           }}

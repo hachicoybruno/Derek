@@ -102,6 +102,15 @@ describe.skipIf(!disponible)("RLS: cada usuario ve solo sus datos", () => {
     expect(error).not.toBeNull();
   });
 
+  it("plantillas: B no ve ni edita las de A", async () => {
+    const { error } = await a.cliente.from("plantillas").insert({ tipo: "recibo", contenido: "Recibí de {{comprador.nombre}}" });
+    expect(error).toBeNull();
+    expect((await b.cliente.from("plantillas").select("id")).data).toEqual([]);
+    await b.cliente.from("plantillas").update({ contenido: "hackeado" }).eq("tipo", "recibo");
+    const { data } = await a.cliente.from("plantillas").select("contenido").single();
+    expect(data?.contenido).toBe("Recibí de {{comprador.nombre}}");
+  });
+
   it("storage: B no puede leer ni subir en la carpeta de A", async () => {
     const ruta = `${a.id}/${autoDeA}/prueba.jpg`;
     const archivo = new Blob([new Uint8Array([0xff, 0xd8, 0xff])], { type: "image/jpeg" });

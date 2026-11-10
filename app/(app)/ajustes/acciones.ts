@@ -12,6 +12,13 @@ const esquema = z
   .object({
     nombre: textoOpcional(80),
     negocio: textoOpcional(80),
+    dni: z.preprocess(
+      (v) => (typeof v === "string" && v.trim() ? v.replace(/\s/g, "") : undefined),
+      z.string().regex(/^[0-9A-Za-z-]{6,15}$/, "DNI, CE o RUC inválido.").optional(),
+    ),
+    telefono: textoOpcional(20),
+    direccion: textoOpcional(200),
+    ciudad: textoOpcional(60),
     umbral_verde: porcentaje("Ingresa un porcentaje entre 0 y 100."),
     umbral_amarillo: porcentaje("Ingresa un porcentaje entre 0 y 100."),
   })
@@ -31,6 +38,10 @@ export async function guardarAjustes(_: EstadoFormulario, formData: FormData): P
     .update({
       nombre: datos.data.nombre ?? null,
       negocio: datos.data.negocio ?? null,
+      dni: datos.data.dni ?? null,
+      telefono: datos.data.telefono ?? null,
+      direccion: datos.data.direccion ?? null,
+      ciudad: datos.data.ciudad ?? "Lima",
       umbral_verde: datos.data.umbral_verde,
       umbral_amarillo: datos.data.umbral_amarillo,
     })
