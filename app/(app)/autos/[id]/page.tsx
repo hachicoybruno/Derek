@@ -23,6 +23,7 @@ import { cambiarEstado } from "../acciones";
 import { eliminarDocumento, eliminarGasto } from "./acciones";
 import { FormularioContacto, FormularioDocumento, FormularioGasto, FormularioVenta } from "./formularios";
 import { GaleriaFotos } from "./galeria-fotos";
+import { GeneradorAnuncios } from "./generador-anuncios";
 
 export async function generateMetadata({ params }: PageProps<"/autos/[id]">): Promise<Metadata> {
   const { id } = await params;
@@ -226,7 +227,11 @@ export default async function FichaAuto({ params, searchParams }: PageProps<"/au
         </Desplegable>
       </Seccion>
 
-      {/* ANUNCIOS */}
+      {!vendido && (
+        <Seccion titulo="Anuncios">
+          <GeneradorAnuncios autoId={id} />
+        </Seccion>
+      )}
 
       <Seccion titulo="Datos del auto">
         <Tarjeta>

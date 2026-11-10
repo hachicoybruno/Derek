@@ -13,6 +13,7 @@ import {
   valoresDe,
 } from "@/lib/validacion";
 import type { EstadoFormulario } from "../acciones";
+import { obtenerGenerador, type Anuncio } from "@/lib/anuncios";
 
 function refrescar(autoId: string) {
   revalidatePath(`/autos/${autoId}`);
@@ -153,4 +154,38 @@ export async function fotoPrincipal(formData: FormData) {
   const orden = [id, ...data.map((f) => f.id).filter((x) => x !== id)];
   await Promise.all(orden.map((fotoId, i) => supabase.from("fotos").update({ orden: i }).eq("id", fotoId)));
   refrescar(autoId);
+}
+
+// ── Anuncios ──────────────────────────────────────────────────────────────
+
+export async function generarAnuncios(autoId: string): Promise<{ anuncios?: Anuncio[]; error?: string }> {
+  const { supabase } = await requerirUsuario();
+  if (!esUUID(autoId)) return { error: "Auto no válido." };
+  const [autoR, docsR] = await Promise.all([
+    supabase.from("autos").select("*").eq("id", autoId).single(),
+    supabase.from("documentos").select("tipo, fecha_vencimiento").eq("auto_id", autoId),
+  ]);
+  const a = autoR.data;
+  if (!a) return { error: "Auto no encontrado." };
+
+  const hoy = hoyLima();
+  const vigente = (tipo: string) => (docsR.data ?? []).some((d) => d.tipo === tipo && d.fecha_vencimiento && d.fecha_vencimiento >= hoy);
+
+  // Solo datos del vehículo: nunca placa, DNI ni teléfonos (ver lib/anuncios/ia.ts).
+  const anuncios = await obtenerGenerador().generar({
+    marca: a.marca,
+    modelo: a.modelo,
+    anio: a.anio,
+    version: a.version,
+    color: a.color,
+    kilometraje: a.kilometraje,
+    transmision: a.transmision,
+    combustible: a.combustible,
+    precio: a.precio_venta_objetivo ?? a.precio_venta_final,
+    notas: a.notas,
+    soatVigente: vigente("soat"),
+    revisionVigente: vigente("revision_tecnica"),
+    tieneTarjeta: (docsR.data ?? []).some((d) => d.tipo === "tarjeta_propiedad"),
+  });
+  return { anuncios };
 }
