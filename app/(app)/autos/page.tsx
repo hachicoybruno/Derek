@@ -42,9 +42,11 @@ export default async function Autos({ searchParams }: PageProps<"/autos">) {
               <Download className="size-5" aria-hidden /> Excel
             </a>
           )}
-          <BotonLink href="/autos/nuevo" className="hidden md:inline-flex">
-            <Plus className="size-5" aria-hidden /> Nuevo auto
-          </BotonLink>
+          <div className="hidden md:block">
+            <BotonLink href="/autos/nuevo">
+              <Plus className="size-5" aria-hidden /> Nuevo auto
+            </BotonLink>
+          </div>
         </div>
       </div>
 

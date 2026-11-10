@@ -22,6 +22,7 @@ import { fecha, formatoPlaca, km, porcentaje, soles, solesConSigno } from "@/lib
 import { cambiarEstado } from "../acciones";
 import { eliminarDocumento, eliminarGasto } from "./acciones";
 import { FormularioContacto, FormularioDocumento, FormularioGasto, FormularioVenta } from "./formularios";
+import { GaleriaFotos } from "./galeria-fotos";
 
 export async function generateMetadata({ params }: PageProps<"/autos/[id]">): Promise<Metadata> {
   const { id } = await params;
@@ -55,7 +56,7 @@ export default async function FichaAuto({ params, searchParams }: PageProps<"/au
   const { id } = await params;
   const { nuevo } = await searchParams;
   const { userId } = await requerirUsuario();
-  const { auto, gastos, documentos, vendedor, comprador } = await obtenerAuto(id);
+  const { auto, gastos, documentos, fotos, vendedor, comprador } = await obtenerAuto(id);
   const hoy = hoyLima();
   const c = calcularAuto(auto, hoy);
   const vendido = auto.estado === "vendido";
@@ -87,7 +88,7 @@ export default async function FichaAuto({ params, searchParams }: PageProps<"/au
         </div>
       </div>
 
-      {/* FOTOS */}
+      <GaleriaFotos autoId={id} userId={userId} fotos={fotos} />
 
       <Tarjeta className="space-y-4">
         <div className="text-center">
