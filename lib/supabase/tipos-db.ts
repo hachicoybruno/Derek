@@ -23,7 +23,27 @@ export type Database = {
           }
         },"public": {
           Tables: {
-            "autos": {
+            "alertas_enviadas": {
+                  Row: {
+                    "canal": string,"documento_id": string,"enviado_at": string,"umbral": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "canal": string,"documento_id": string,"enviado_at"?: string,"umbral": number
+                  }
+                  Update: {
+                    "canal"?: string,"documento_id"?: string,"enviado_at"?: string,"umbral"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "alertas_enviadas_documento_id_fkey"
+      columns: ["documento_id"]
+isOneToOne: false
+      referencedRelation: "documentos"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"autos": {
                   Row: {
                     "anio": number,"color": string | null,"combustible": string | null,"comprador_id": string | null,"created_at": string,"estado": string,"fecha_compra": string | null,"fecha_venta": string | null,"id": string,"kilometraje": number | null,"marca": string,"modelo": string,"notas": string | null,"numero_motor": string | null,"numero_serie": string | null,"placa": string,"precio_compra": number | null,"precio_venta_final": number | null,"precio_venta_objetivo": number | null,"transmision": string | null,"updated_at": string,"user_id": string,"vendedor_id": string | null,"version": string | null
                   }
@@ -155,6 +175,34 @@ isOneToOne: false
       referencedColumns: ["id","user_id"]
     }
                   ]
+                },"invitaciones": {
+                  Row: {
+                    "aceptada_at": string | null,"aceptada_por": string | null,"created_at": string,"cuenta_id": string,"email": string,"expira_at": string,"id": string,"rol": string,"token": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "aceptada_at"?: string | null,"aceptada_por"?: string | null,"created_at"?: string,"cuenta_id"?: string,"email": string,"expira_at"?: string,"id"?: string,"rol"?: string,"token"?: string
+                  }
+                  Update: {
+                    "aceptada_at"?: string | null,"aceptada_por"?: string | null,"created_at"?: string,"cuenta_id"?: string,"email"?: string,"expira_at"?: string,"id"?: string,"rol"?: string,"token"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"miembros": {
+                  Row: {
+                    "created_at": string,"cuenta_id": string,"rol": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"cuenta_id": string,"rol"?: string,"user_id": string
+                  }
+                  Update: {
+                    "created_at"?: string,"cuenta_id"?: string,"rol"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
                 },"pagos": {
                   Row: {
                     "created_at": string,"estado": string,"fecha": string,"id": string,"moneda": string,"monto": number,"plan": string | null,"proveedor": string,"proveedor_pago_id": string,"proveedor_suscripcion_id": string | null,"user_id": string
@@ -171,14 +219,14 @@ isOneToOne: false
                   ]
                 },"perfiles": {
                   Row: {
-                    "ciudad": string,"created_at": string,"direccion": string | null,"dni": string | null,"id": string,"negocio": string | null,"nombre": string | null,"telefono": string | null,"umbral_amarillo": number,"umbral_verde": number,"updated_at": string
+                    "alertas_email": boolean,"alertas_whatsapp": boolean,"ciudad": string,"correo_alertas": string | null,"created_at": string,"direccion": string | null,"dni": string | null,"id": string,"negocio": string | null,"nombre": string | null,"telefono": string | null,"umbral_amarillo": number,"umbral_verde": number,"updated_at": string,"whatsapp": string | null
                   }
                   ComputedFields: never
                   Insert: {
-                    "ciudad"?: string,"created_at"?: string,"direccion"?: string | null,"dni"?: string | null,"id": string,"negocio"?: string | null,"nombre"?: string | null,"telefono"?: string | null,"umbral_amarillo"?: number,"umbral_verde"?: number,"updated_at"?: string
+                    "alertas_email"?: boolean,"alertas_whatsapp"?: boolean,"ciudad"?: string,"correo_alertas"?: string | null,"created_at"?: string,"direccion"?: string | null,"dni"?: string | null,"id": string,"negocio"?: string | null,"nombre"?: string | null,"telefono"?: string | null,"umbral_amarillo"?: number,"umbral_verde"?: number,"updated_at"?: string,"whatsapp"?: string | null
                   }
                   Update: {
-                    "ciudad"?: string,"created_at"?: string,"direccion"?: string | null,"dni"?: string | null,"id"?: string,"negocio"?: string | null,"nombre"?: string | null,"telefono"?: string | null,"umbral_amarillo"?: number,"umbral_verde"?: number,"updated_at"?: string
+                    "alertas_email"?: boolean,"alertas_whatsapp"?: boolean,"ciudad"?: string,"correo_alertas"?: string | null,"created_at"?: string,"direccion"?: string | null,"dni"?: string | null,"id"?: string,"negocio"?: string | null,"nombre"?: string | null,"telefono"?: string | null,"umbral_amarillo"?: number,"umbral_verde"?: number,"updated_at"?: string,"whatsapp"?: string | null
                   }
                   Relationships: [
                     
@@ -237,11 +285,37 @@ isOneToOne: false
                 }
           }
           Functions: {
-            "hoy_lima":
+            "aceptar_invitacion":
+{ Args: { "p_token": string }; Returns: string
+                           },
+"cuenta_actual":
 { Args: Record<PropertyKey, never>; Returns: string
+                           },
+"hoy_lima":
+{ Args: Record<PropertyKey, never>; Returns: string
+                           },
+"listar_miembros":
+{ Args: Record<PropertyKey, never>; Returns: {
+              "desde": string,"email": string,"nombre": string,"rol": string,"user_id": string
+            }[]
+                           },
+"mi_contexto":
+{ Args: Record<PropertyKey, never>; Returns: Json
+                           },
+"plan_de_cuenta":
+{ Args: { "uid": string }; Returns: string
                            },
 "plan_efectivo":
 { Args: { "uid": string }; Returns: string
+                           },
+"rol_actual":
+{ Args: Record<PropertyKey, never>; Returns: string
+                           },
+"validar_cupo_equipo":
+{ Args: { "p_cuenta": string }; Returns: undefined
+                           },
+"ver_invitacion":
+{ Args: { "p_token": string }; Returns: Json
                            }
           }
           Enums: {

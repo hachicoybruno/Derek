@@ -39,11 +39,12 @@ export async function registrarse(_: EstadoAuth, formData: FormData): Promise<Es
   if (!datos.success) return { error: datos.error.issues[0].message, email };
   const nombre = String(formData.get("nombre") ?? "").trim().slice(0, 80);
 
+  const siguiente = rutaSegura(String(formData.get("siguiente") ?? ""));
   const supabase = await crearClienteServidor();
   const { data, error } = await supabase.auth.signUp({
     ...datos.data,
     options: {
-      emailRedirectTo: `${siteUrl()}/auth/callback`,
+      emailRedirectTo: `${siteUrl()}/auth/callback?siguiente=${encodeURIComponent(siguiente)}`,
       data: nombre ? { full_name: nombre } : undefined,
     },
   });
@@ -53,7 +54,7 @@ export async function registrarse(_: EstadoAuth, formData: FormData): Promise<Es
   if (!data.session) {
     return { mensaje: `Te enviamos un correo a ${datos.data.email}. Abre el enlace para activar tu cuenta.`, email };
   }
-  redirect("/dashboard");
+  redirect(siguiente);
 }
 
 export async function entrarConGoogle(formData: FormData) {

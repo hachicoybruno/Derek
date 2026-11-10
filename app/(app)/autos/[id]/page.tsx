@@ -58,7 +58,7 @@ const estilosVencimiento = {
 export default async function FichaAuto({ params, searchParams }: PageProps<"/autos/[id]">) {
   const { id } = await params;
   const { nuevo, aviso } = await searchParams;
-  const { userId } = await requerirUsuario();
+  const { cuentaId, esDueno } = await requerirUsuario();
   const [{ auto, gastos, documentos, fotos, vendedor, comprador }, perfil] = await Promise.all([obtenerAuto(id), obtenerPerfil()]);
   const hoy = hoyLima();
   const c = calcularAuto(auto, hoy);
@@ -97,7 +97,7 @@ export default async function FichaAuto({ params, searchParams }: PageProps<"/au
         </div>
       </div>
 
-      <GaleriaFotos autoId={id} userId={userId} fotos={fotos} />
+      <GaleriaFotos autoId={id} cuentaId={cuentaId} fotos={fotos} puedeBorrar={esDueno} />
 
       <Tarjeta className="space-y-4">
         <div className="text-center">
@@ -172,7 +172,8 @@ export default async function FichaAuto({ params, searchParams }: PageProps<"/au
                   </p>
                   <p className="text-sm text-slate-500">{fecha(g.fecha)}</p>
                 </div>
-                <p className="font-bold whitespace-nowrap">{soles(g.monto)}</p>
+                <p className={cx("font-bold whitespace-nowrap", !esDueno && "pr-3")}>{soles(g.monto)}</p>
+                {esDueno && (
                 <BotonConfirmar
                   accion={eliminarGasto}
                   campos={{ id: g.id, auto_id: id }}
@@ -181,6 +182,7 @@ export default async function FichaAuto({ params, searchParams }: PageProps<"/au
                 >
                   <Trash2 className="size-5" aria-hidden />
                 </BotonConfirmar>
+                )}
               </div>
             ))}
           </Tarjeta>
@@ -217,6 +219,7 @@ export default async function FichaAuto({ params, searchParams }: PageProps<"/au
                       <FileText className="size-5" aria-hidden />
                     </a>
                   )}
+                  {esDueno && (
                   <BotonConfirmar
                     accion={eliminarDocumento}
                     campos={{ id: d.id, auto_id: id }}
@@ -225,13 +228,14 @@ export default async function FichaAuto({ params, searchParams }: PageProps<"/au
                   >
                     <Trash2 className="size-5" aria-hidden />
                   </BotonConfirmar>
+                  )}
                 </div>
               );
             })}
           </Tarjeta>
         )}
         <Desplegable titulo="Agregar documento">
-          <FormularioDocumento autoId={id} userId={userId} />
+          <FormularioDocumento autoId={id} cuentaId={cuentaId} />
         </Desplegable>
       </Seccion>
 

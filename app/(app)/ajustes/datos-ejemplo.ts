@@ -5,8 +5,8 @@ import { insertarDatosEjemplo } from "@/lib/datos-ejemplo";
 import { hoyLima } from "@/lib/fechas";
 
 export async function cargarDatosEjemplo(): Promise<{ error?: string; ok?: boolean }> {
-  const { supabase, userId } = await requerirUsuario();
-  const r = await insertarDatosEjemplo(supabase, userId, hoyLima());
+  const { supabase, cuentaId } = await requerirUsuario();
+  const r = await insertarDatosEjemplo(supabase, cuentaId, hoyLima());
   revalidatePath("/", "layout");
   return r;
 }

@@ -2,7 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { supabaseEnv } from "./env";
 
-const RUTAS_PRIVADAS = ["/dashboard", "/autos", "/calculadora", "/vencimientos", "/ajustes", "/plantillas", "/suscripcion"];
+const RUTAS_PRIVADAS = ["/dashboard", "/autos", "/calculadora", "/vencimientos", "/ajustes", "/plantillas", "/suscripcion", "/equipo"];
 const RUTAS_AUTH = ["/login", "/registro"];
 
 function empiezaCon(path: string, rutas: string[]) {
@@ -43,7 +43,11 @@ export async function actualizarSesion(request: NextRequest) {
   };
 
   if (!conSesion && empiezaCon(path, RUTAS_PRIVADAS)) return redirigir("/login", true);
-  if (conSesion && empiezaCon(path, RUTAS_AUTH)) return redirigir("/dashboard");
+  if (conSesion && empiezaCon(path, RUTAS_AUTH)) {
+    const siguiente = request.nextUrl.searchParams.get("siguiente");
+    const destino = siguiente && siguiente.startsWith("/") && !siguiente.startsWith("//") ? siguiente.split("?")[0] : "/dashboard";
+    return redirigir(destino);
+  }
 
   return response;
 }

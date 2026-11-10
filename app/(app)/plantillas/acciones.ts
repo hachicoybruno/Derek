@@ -6,7 +6,8 @@ import { esTipoPlantilla } from "@/lib/documentos/plantillas-base";
 export type EstadoPlantilla = { ok?: boolean; error?: string };
 
 export async function guardarPlantilla(_: EstadoPlantilla, formData: FormData): Promise<EstadoPlantilla> {
-  const { supabase, userId } = await requerirUsuario();
+  const { supabase, userId, esDueno } = await requerirUsuario();
+  if (!esDueno) return { error: "Solo el dueño del negocio puede editar las plantillas." };
   const tipo = formData.get("tipo");
   const contenido = String(formData.get("contenido") ?? "").replace(/\r\n?/g, "\n").trim();
   if (!esTipoPlantilla(tipo)) return { error: "Tipo de plantilla no válido." };
@@ -22,7 +23,8 @@ export async function guardarPlantilla(_: EstadoPlantilla, formData: FormData): 
 }
 
 export async function restaurarPlantilla(formData: FormData) {
-  const { supabase } = await requerirUsuario();
+  const { supabase, esDueno } = await requerirUsuario();
+  if (!esDueno) return;
   const tipo = formData.get("tipo");
   if (!esTipoPlantilla(tipo)) return;
   await supabase.from("plantillas").delete().eq("tipo", tipo);

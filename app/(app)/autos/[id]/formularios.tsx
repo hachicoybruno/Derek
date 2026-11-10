@@ -49,7 +49,7 @@ export function FormularioGasto({ autoId, hoy }: { autoId: string; hoy: string }
   );
 }
 
-export function FormularioDocumento({ autoId, userId }: { autoId: string; userId: string }) {
+export function FormularioDocumento({ autoId, cuentaId }: { autoId: string; cuentaId: string }) {
   const [estado, accion] = useActionState<EstadoFormulario, FormData>(agregarDocumento, {});
   const [subiendo, setSubiendo] = useState(false);
   const [errorArchivo, setErrorArchivo] = useState<string>();
@@ -69,7 +69,7 @@ export function FormularioDocumento({ autoId, userId }: { autoId: string; userId
       if (archivo.size > 10 * 1024 * 1024) return setErrorArchivo("El archivo pesa más de 10 MB.");
       setSubiendo(true);
       const ext = (archivo.name.split(".").pop() ?? "pdf").toLowerCase().replace(/[^a-z0-9]/g, "") || "pdf";
-      const ruta = `${userId}/${autoId}/doc-${idAleatorio()}.${ext}`;
+      const ruta = `${cuentaId}/${autoId}/doc-${idAleatorio()}.${ext}`;
       const { error } = await crearClienteNavegador()
         .storage.from("documentos")
         .upload(ruta, archivo, { contentType: archivo.type || undefined });

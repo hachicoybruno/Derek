@@ -6,6 +6,7 @@ import { Aviso } from "@/components/ui";
 import { obtenerPlantilla } from "@/lib/datos";
 import { AVISO_LEGAL, esTipoPlantilla, INFO_PLANTILLA, PLANTILLAS_BASE, VARIABLES } from "@/lib/documentos/plantillas-base";
 import { EditorPlantilla } from "./editor";
+import { requerirUsuario } from "@/lib/auth";
 
 export async function generateMetadata({ params }: PageProps<"/plantillas/[tipo]">): Promise<Metadata> {
   const { tipo } = await params;
@@ -15,7 +16,7 @@ export async function generateMetadata({ params }: PageProps<"/plantillas/[tipo]
 export default async function EditarPlantilla({ params }: PageProps<"/plantillas/[tipo]">) {
   const { tipo } = await params;
   if (!esTipoPlantilla(tipo)) notFound();
-  const { contenido, editada } = await obtenerPlantilla(tipo);
+  const [{ contenido, editada }, { esDueno }] = await Promise.all([obtenerPlantilla(tipo), requerirUsuario()]);
 
   return (
     <div className="mx-auto max-w-3xl space-y-4">
@@ -27,6 +28,12 @@ export default async function EditarPlantilla({ params }: PageProps<"/plantillas
         <strong>{AVISO_LEGAL}</strong> Este texto es un modelo general. Antes de usarlo, haz que un abogado lo revise y lo adapte a
         tu caso. El aviso se imprime siempre al pie de cada PDF.
       </Aviso>
+      {!esDueno ? (
+        <>
+          <Aviso tipo="info">Solo el dueño del negocio puede editar las plantillas.</Aviso>
+          <pre className="rounded-xl bg-white p-3 text-sm whitespace-pre-wrap ring-1 ring-slate-200">{contenido}</pre>
+        </>
+      ) : (
       <EditorPlantilla
         tipo={tipo}
         inicial={contenido}
@@ -34,6 +41,7 @@ export default async function EditarPlantilla({ params }: PageProps<"/plantillas
         editada={editada}
         variables={VARIABLES[tipo]}
       />
+      )}
     </div>
   );
 }

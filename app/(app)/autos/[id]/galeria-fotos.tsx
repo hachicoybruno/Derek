@@ -9,7 +9,17 @@ import { eliminarFoto, fotoPrincipal, registrarFotos } from "./acciones";
 
 const MAX_FOTOS = 20;
 
-export function GaleriaFotos({ autoId, userId, fotos }: { autoId: string; userId: string; fotos: Foto[] }) {
+export function GaleriaFotos({
+  autoId,
+  cuentaId,
+  fotos,
+  puedeBorrar,
+}: {
+  autoId: string;
+  cuentaId: string;
+  fotos: Foto[];
+  puedeBorrar: boolean;
+}) {
   const [progreso, setProgreso] = useState<string>();
   const [error, setError] = useState<string>();
   const [abierta, setAbierta] = useState<number | null>(null);
@@ -31,7 +41,7 @@ export function GaleriaFotos({ autoId, userId, fotos }: { autoId: string; userId
       setProgreso(`Subiendo ${i + 1} de ${lista.length}…`);
       try {
         const [grande, chica] = await Promise.all([comprimirImagen(archivo, 1600, 0.8), comprimirImagen(archivo, 400, 0.7)]);
-        const base = `${userId}/${autoId}/${idAleatorio()}`;
+        const base = `${cuentaId}/${autoId}/${idAleatorio()}`;
         const r1 = await supabase.storage.from("fotos-autos").upload(`${base}.jpg`, grande, { contentType: "image/jpeg" });
         const r2 = await supabase.storage.from("fotos-autos").upload(`${base}_t.jpg`, chica, { contentType: "image/jpeg" });
         if (r1.error || r2.error) throw r1.error ?? r2.error;
@@ -147,10 +157,11 @@ export function GaleriaFotos({ autoId, userId, fotos }: { autoId: string; userId
               )}
             </div>
             <p className="text-center text-sm text-white">{abierta + 1} de {fotos.length}</p>
-            <div className="grid grid-cols-2 gap-2">
+            <div className={cx("grid gap-2", puedeBorrar ? "grid-cols-2" : "grid-cols-1")}>
               <Boton variante="secundario" disabled={abierta === 0 || pendiente} onClick={() => ejecutar(fotoPrincipal, actual, false)}>
                 <Star className="size-5" aria-hidden /> {abierta === 0 ? "Es la principal" : "Usar de principal"}
               </Boton>
+              {puedeBorrar && (
               <Boton
                 variante="peligro"
                 disabled={pendiente}
@@ -158,6 +169,7 @@ export function GaleriaFotos({ autoId, userId, fotos }: { autoId: string; userId
               >
                 <Trash2 className="size-5" aria-hidden /> Eliminar
               </Boton>
+              )}
             </div>
           </div>
         )}

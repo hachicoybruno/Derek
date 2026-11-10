@@ -22,8 +22,8 @@ function refrescar(autoId: string) {
 }
 
 /** La ruta de un archivo debe estar dentro de la carpeta del usuario y del auto. */
-function rutaValida(ruta: unknown, userId: string, autoId: string): ruta is string {
-  return typeof ruta === "string" && ruta.startsWith(`${userId}/${autoId}/`) && !ruta.includes("..");
+function rutaValida(ruta: unknown, cuentaId: string, autoId: string): ruta is string {
+  return typeof ruta === "string" && ruta.startsWith(`${cuentaId}/${autoId}/`) && !ruta.includes("..");
 }
 
 // ── Gastos ────────────────────────────────────────────────────────────────
@@ -57,7 +57,8 @@ export async function agregarGasto(_: EstadoFormulario, formData: FormData): Pro
 }
 
 export async function eliminarGasto(formData: FormData) {
-  const { supabase } = await requerirUsuario();
+  const { supabase, esDueno } = await requerirUsuario();
+  if (!esDueno) return;
   const id = formData.get("id");
   const autoId = formData.get("auto_id");
   if (!esUUID(id) || !esUUID(autoId)) return;
@@ -74,7 +75,7 @@ const esquemaDocumento = z.object({
 });
 
 export async function agregarDocumento(_: EstadoFormulario, formData: FormData): Promise<EstadoFormulario> {
-  const { supabase, userId } = await requerirUsuario();
+  const { supabase, cuentaId } = await requerirUsuario();
   const autoId = formData.get("auto_id");
   if (!esUUID(autoId)) return { error: "Auto no válido." };
   const datos = esquemaDocumento.safeParse(Object.fromEntries(formData));
@@ -90,7 +91,7 @@ export async function agregarDocumento(_: EstadoFormulario, formData: FormData):
     tipo,
     fecha_vencimiento: datos.data.fecha_vencimiento ?? null,
     descripcion: datos.data.descripcion ?? null,
-    archivo_path: rutaValida(archivo, userId, autoId) ? archivo : null,
+    archivo_path: rutaValida(archivo, cuentaId, autoId) ? archivo : null,
   });
   if (error) return { error: "No se pudo guardar el documento. Intenta de nuevo.", valores: valoresDe(formData) };
   refrescar(autoId);
@@ -100,7 +101,8 @@ export async function agregarDocumento(_: EstadoFormulario, formData: FormData):
 }
 
 export async function eliminarDocumento(formData: FormData) {
-  const { supabase } = await requerirUsuario();
+  const { supabase, esDueno } = await requerirUsuario();
+  if (!esDueno) return;
   const id = formData.get("id");
   const autoId = formData.get("auto_id");
   if (!esUUID(id) || !esUUID(autoId)) return;
@@ -115,9 +117,9 @@ export async function eliminarDocumento(formData: FormData) {
 
 /** Registra en la BD las fotos que el navegador ya subió al storage. */
 export async function registrarFotos(autoId: string, fotos: { path: string; miniatura: string }[]) {
-  const { supabase, userId } = await requerirUsuario();
+  const { supabase, cuentaId } = await requerirUsuario();
   if (!esUUID(autoId)) return { error: "Auto no válido." };
-  const validas = fotos.filter((f) => rutaValida(f.path, userId, autoId) && rutaValida(f.miniatura, userId, autoId));
+  const validas = fotos.filter((f) => rutaValida(f.path, cuentaId, autoId) && rutaValida(f.miniatura, cuentaId, autoId));
   if (!validas.length) return { error: "No hay fotos válidas." };
 
   const { count } = await supabase.from("fotos").select("id", { count: "exact", head: true }).eq("auto_id", autoId);
@@ -131,7 +133,8 @@ export async function registrarFotos(autoId: string, fotos: { path: string; mini
 }
 
 export async function eliminarFoto(formData: FormData) {
-  const { supabase } = await requerirUsuario();
+  const { supabase, esDueno } = await requerirUsuario();
+  if (!esDueno) return;
   const id = formData.get("id");
   const autoId = formData.get("auto_id");
   if (!esUUID(id) || !esUUID(autoId)) return;

@@ -20,7 +20,7 @@ const fechaCorta = (iso: string | null) => {
 
 export default async function Suscripcion({ searchParams }: PageProps<"/suscripcion">) {
   const { plan: planParam, ok } = await searchParams;
-  const { supabase, userId } = await requerirUsuario();
+  const { supabase, userId, esDueno } = await requerirUsuario();
   const [s, { data: pagos }] = await Promise.all([
     obtenerSuscripcion(),
     supabase.from("pagos").select("*").order("fecha", { ascending: false }).limit(24),
@@ -35,6 +35,18 @@ export default async function Suscripcion({ searchParams }: PageProps<"/suscripc
   else if (s.estado === "cancelada" && s.planEfectivo) estadoTexto = `Cancelaste tu plan ${INFO_PLANES[s.plan].nombre}. Tienes acceso hasta el ${fechaCorta(s.periodoHasta)}.`;
   else if (s.estado === "suspendida") estadoTexto = "Tu suscripción está suspendida porque no se pudo realizar el cobro.";
   else estadoTexto = "No tienes un plan activo. Tus datos siguen guardados: elige un plan para seguir agregando autos.";
+
+  if (!esDueno) {
+    return (
+      <div className="mx-auto max-w-xl space-y-4">
+        <h1 className="text-2xl font-bold">Suscripción</h1>
+        <Tarjeta className="space-y-2">
+          <p className="font-semibold">{estadoTexto}</p>
+          <p className="text-slate-600">El dueño del negocio gestiona el plan y los pagos.</p>
+        </Tarjeta>
+      </div>
+    );
+  }
 
   if (elegido) {
     const p = INFO_PLANES[elegido];

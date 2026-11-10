@@ -31,16 +31,24 @@ function limpiarBusqueda(q: string) {
 }
 
 export const obtenerUmbrales = cache(async (): Promise<Umbrales> => {
-  const { supabase } = await requerirUsuario();
-  const { data } = await supabase.from("perfiles").select("umbral_verde, umbral_amarillo").maybeSingle();
+  const { supabase, cuentaId } = await requerirUsuario();
+  const { data } = await supabase.from("perfiles").select("umbral_verde, umbral_amarillo").eq("id", cuentaId).maybeSingle();
   if (!data) return UMBRALES_POR_DEFECTO;
   return { verde: Number(data.umbral_verde), amarillo: Number(data.umbral_amarillo) };
 });
 
+/** Perfil del negocio (del dueño): datos legales, ciudad, umbrales y alertas. */
 export const obtenerPerfil = cache(async () => {
-  const { supabase, email } = await requerirUsuario();
-  const { data } = await supabase.from("perfiles").select("*").maybeSingle();
+  const { supabase, email, cuentaId } = await requerirUsuario();
+  const { data } = await supabase.from("perfiles").select("*").eq("id", cuentaId).maybeSingle();
   return { ...data, email };
+});
+
+/** Perfil del usuario actual (su nombre). Para el dueño es el mismo que el del negocio. */
+export const obtenerMiPerfil = cache(async () => {
+  const { supabase, userId, email, rol } = await requerirUsuario();
+  const { data } = await supabase.from("perfiles").select("nombre").eq("id", userId).maybeSingle();
+  return { nombre: data?.nombre ?? null, email, rol };
 });
 
 async function urlsFirmadas(bucket: "fotos-autos" | "documentos", paths: string[]) {
@@ -177,4 +185,24 @@ export async function obtenerPlantilla(tipo: TipoPlantilla) {
   const { supabase } = await requerirUsuario();
   const { data } = await supabase.from("plantillas").select("contenido, updated_at").eq("tipo", tipo).maybeSingle();
   return { contenido: data?.contenido ?? PLANTILLAS_BASE[tipo], editada: Boolean(data), actualizada: data?.updated_at ?? null };
+}
+
+export type Miembro = { user_id: string; email: string; nombre: string | null; rol: "dueno" | "vendedor"; desde: string };
+
+export async function listarMiembros(): Promise<Miembro[]> {
+  const { supabase } = await requerirUsuario();
+  const { data } = await supabase.rpc("listar_miembros");
+  return (data ?? []) as Miembro[];
+}
+
+export async function listarInvitacionesPendientes() {
+  const { supabase, esDueno } = await requerirUsuario();
+  if (!esDueno) return [];
+  const { data } = await supabase
+    .from("invitaciones")
+    .select("id, email, token, expira_at, created_at")
+    .is("aceptada_at", null)
+    .gt("expira_at", new Date().toISOString())
+    .order("created_at", { ascending: false });
+  return data ?? [];
 }

@@ -28,8 +28,18 @@ const esquema = z
   });
 
 export async function guardarAjustes(_: EstadoFormulario, formData: FormData): Promise<EstadoFormulario> {
-  const { supabase, userId } = await requerirUsuario();
+  const { supabase, userId, esDueno } = await requerirUsuario();
   const valores = valoresDe(formData);
+
+  // El vendedor solo cambia su nombre; los datos del negocio los edita el dueño.
+  if (!esDueno) {
+    const nombre = String(formData.get("nombre") ?? "").trim().slice(0, 80) || null;
+    const { error } = await supabase.from("perfiles").update({ nombre }).eq("id", userId);
+    if (error) return { error: "No se pudo guardar.", valores };
+    revalidatePath("/", "layout");
+    return { ok: true, valores };
+  }
+
   const datos = esquema.safeParse(Object.fromEntries(formData));
   if (!datos.success) return { errores: erroresPorCampo(datos.error), valores };
 

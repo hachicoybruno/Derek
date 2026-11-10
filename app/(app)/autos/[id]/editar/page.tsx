@@ -5,12 +5,13 @@ import { obtenerAuto } from "@/lib/datos";
 import { hoyLima } from "@/lib/fechas";
 import { FormularioAuto } from "../../formulario-auto";
 import { BotonEliminarAuto } from "../boton-eliminar-auto";
+import { requerirUsuario } from "@/lib/auth";
 
 export const metadata: Metadata = { title: "Editar auto" };
 
 export default async function EditarAuto({ params }: PageProps<"/autos/[id]/editar">) {
   const { id } = await params;
-  const { auto } = await obtenerAuto(id);
+  const [{ auto }, { esDueno }] = await Promise.all([obtenerAuto(id), requerirUsuario()]);
   return (
     <div className="mx-auto max-w-xl space-y-4">
       <Link href={`/autos/${id}`} className="inline-flex min-h-11 items-center gap-1 font-semibold text-marca-700">
@@ -20,9 +21,11 @@ export default async function EditarAuto({ params }: PageProps<"/autos/[id]/edit
         Editar {auto.marca} {auto.modelo}
       </h1>
       <FormularioAuto auto={auto} hoy={hoyLima()} />
-      <div className="border-t border-slate-200 pt-4">
-        <BotonEliminarAuto id={id} />
-      </div>
+      {esDueno && (
+        <div className="border-t border-slate-200 pt-4">
+          <BotonEliminarAuto id={id} />
+        </div>
+      )}
     </div>
   );
 }

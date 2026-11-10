@@ -17,7 +17,7 @@ export type PerfilAjustes = {
 };
 type Perfil = PerfilAjustes;
 
-export function FormularioAjustes({ perfil }: { perfil: Perfil }) {
+export function FormularioAjustes({ perfil, soloNombre = false }: { perfil: Perfil; soloNombre?: boolean }) {
   const [estado, accion] = useActionState<EstadoFormulario, FormData>(guardarAjustes, {});
   const e = estado.errores ?? {};
   const v = (campo: keyof Perfil) => estado.valores?.[campo] ?? String(perfil[campo] ?? "");
@@ -25,14 +25,18 @@ export function FormularioAjustes({ perfil }: { perfil: Perfil }) {
   return (
     <form action={accion} className="space-y-5" noValidate>
       <div className="grid gap-3 sm:grid-cols-2">
-        <Campo etiqueta="Tu nombre completo" ayuda="Así aparecerá en contratos y recibos.">
+        <Campo etiqueta="Tu nombre completo" ayuda={soloNombre ? undefined : "Así aparecerá en contratos y recibos."}>
           <Entrada name="nombre" defaultValue={v("nombre")} autoComplete="name" />
         </Campo>
-        <Campo etiqueta="Nombre del negocio (opcional)">
-          <Entrada name="negocio" defaultValue={v("negocio")} placeholder="Ej. Autos Andree" />
-        </Campo>
+        {!soloNombre && (
+          <Campo etiqueta="Nombre del negocio (opcional)">
+            <Entrada name="negocio" defaultValue={v("negocio")} placeholder="Ej. Autos Andree" />
+          </Campo>
+        )}
       </div>
 
+      {!soloNombre && (
+        <>
       <fieldset className="space-y-3">
         <legend className="font-bold">Tus datos para contratos y recibos</legend>
         <p className="text-sm text-slate-600">Aparecen cuando tú figuras como vendedor. Puedes dejarlos vacíos y llenarlos a mano.</p>
@@ -65,6 +69,9 @@ export function FormularioAjustes({ perfil }: { perfil: Perfil }) {
         </div>
         <p className="text-sm text-slate-500">🔴 Rojo: por debajo del amarillo.</p>
       </fieldset>
+
+        </>
+      )}
 
       {estado.error && <Aviso tipo="error">{estado.error}</Aviso>}
       {estado.ok && <Aviso tipo="exito">Ajustes guardados.</Aviso>}

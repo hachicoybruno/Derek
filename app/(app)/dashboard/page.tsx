@@ -3,9 +3,9 @@ import Link from "next/link";
 import { AlertTriangle, ChevronRight, Plus } from "lucide-react";
 import { colorGanancia } from "@/components/badges";
 import { BotonDatosEjemplo } from "@/components/boton-datos-ejemplo";
-import { BotonLink, cx, Seccion, Tarjeta, Vacio } from "@/components/ui";
+import { Aviso, BotonLink, cx, Seccion, Tarjeta, Vacio } from "@/components/ui";
 import { calcularAuto, resumenDashboard } from "@/lib/calculos";
-import { listarAutos, listarVencimientos, obtenerPerfil } from "@/lib/datos";
+import { listarAutos, listarVencimientos, obtenerMiPerfil } from "@/lib/datos";
 import { hoyLima } from "@/lib/fechas";
 import { formatoPlaca, porcentaje, soles, solesConSigno } from "@/lib/formato";
 import { obtenerSuscripcion } from "@/lib/suscripcion";
@@ -25,8 +25,9 @@ function Kpi({ titulo, valor, detalle, className }: { titulo: string; valor: Rea
   );
 }
 
-export default async function Dashboard() {
-  const [autos, venc, perfil, suscripcion] = await Promise.all([listarAutos(), listarVencimientos(), obtenerPerfil(), obtenerSuscripcion()]);
+export default async function Dashboard({ searchParams }: PageProps<"/dashboard">) {
+  const { bienvenida } = await searchParams;
+  const [autos, venc, perfil, suscripcion] = await Promise.all([listarAutos(), listarVencimientos(), obtenerMiPerfil(), obtenerSuscripcion()]);
   const completo = Boolean(suscripcion.info?.dashboardCompleto);
   // Las alertas de vencimiento son parte de los planes Pro y Concesionario.
   const documentos = suscripcion.info?.alertas ? venc.documentos : [];
@@ -45,6 +46,9 @@ export default async function Dashboard() {
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold">{nombre ? `Hola, ${nombre}` : "Inicio"}</h1>
+      {bienvenida === "equipo" && (
+        <Aviso tipo="exito">¡Te uniste al equipo! Ahora ves y registras los autos del negocio.</Aviso>
+      )}
 
       {documentos.length > 0 && (
         <Link

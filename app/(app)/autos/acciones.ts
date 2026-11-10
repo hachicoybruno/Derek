@@ -227,7 +227,8 @@ export async function guardarContacto(_: EstadoFormulario, formData: FormData): 
 }
 
 export async function eliminarAuto(formData: FormData) {
-  const { supabase } = await requerirUsuario();
+  const { supabase, esDueno } = await requerirUsuario();
+  if (!esDueno) return;
   const id = formData.get("id");
   if (!esUUID(id)) return;
 

@@ -13,7 +13,8 @@ const deps = () => ({ db: crearClienteAdmin(), proveedor: (id: ProveedorId) => p
  * No se confía en el navegador: se consulta la suscripción al proveedor y se valida que sea de este usuario.
  */
 export async function confirmarSuscripcion(suscripcionId: string, planEsperado: string): Promise<{ ok?: boolean; error?: string }> {
-  const { userId } = await requerirUsuario();
+  const { userId, esDueno } = await requerirUsuario();
+  if (!esDueno) return { error: "Solo el dueño del negocio puede gestionar la suscripción." };
   const proveedor = proveedorActivo();
   if (!proveedor) return { error: "Los pagos no están configurados." };
   if (!esPlan(planEsperado)) return { error: "Plan no válido." };
@@ -33,8 +34,9 @@ export async function confirmarSuscripcion(suscripcionId: string, planEsperado: 
 }
 
 export async function cancelarSuscripcion(): Promise<{ ok?: boolean; error?: string }> {
-  const { supabase, userId } = await requerirUsuario();
-  const { data: s } = await supabase.from("suscripciones").select("*").maybeSingle();
+  const { supabase, userId, esDueno } = await requerirUsuario();
+  if (!esDueno) return { error: "Solo el dueño del negocio puede gestionar la suscripción." };
+  const { data: s } = await supabase.from("suscripciones").select("*").eq("user_id", userId).maybeSingle();
   if (!s?.proveedor_suscripcion_id || s.estado !== "activa") return { error: "No tienes una suscripción activa." };
   const proveedor = proveedorPorId(s.proveedor);
   if (!proveedor) return { error: "No se pudo contactar al proveedor de pagos." };

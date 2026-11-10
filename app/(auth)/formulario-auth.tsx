@@ -5,7 +5,7 @@ import { BotonEnviar } from "@/components/boton-enviar";
 import { Aviso, Campo, Entrada } from "@/components/ui";
 import { iniciarSesion, registrarse, type EstadoAuth } from "./acciones";
 
-export function FormularioAuth({ modo, siguiente }: { modo: "login" | "registro"; siguiente?: string }) {
+export function FormularioAuth({ modo, siguiente, emailInicial }: { modo: "login" | "registro"; siguiente?: string; emailInicial?: string }) {
   const [estado, accion] = useActionState<EstadoAuth, FormData>(
     modo === "login" ? iniciarSesion : registrarse,
     {},
@@ -35,7 +35,7 @@ export function FormularioAuth({ modo, siguiente }: { modo: "login" | "registro"
           inputMode="email"
           autoComplete="email"
           required
-          defaultValue={estado.email}
+          defaultValue={estado.email ?? emailInicial}
           placeholder="tucorreo@gmail.com"
         />
       </Campo>
@@ -56,14 +56,14 @@ export function FormularioAuth({ modo, siguiente }: { modo: "login" | "registro"
         {modo === "login" ? (
           <>
             ¿No tienes cuenta?{" "}
-            <Link href="/registro" className="font-semibold text-marca-700 underline">
+            <Link href={siguiente ? `/registro?siguiente=${encodeURIComponent(siguiente)}` : "/registro"} className="font-semibold text-marca-700 underline">
               Regístrate
             </Link>
           </>
         ) : (
           <>
             ¿Ya tienes cuenta?{" "}
-            <Link href="/login" className="font-semibold text-marca-700 underline">
+            <Link href={siguiente ? `/login?siguiente=${encodeURIComponent(siguiente)}` : "/login"} className="font-semibold text-marca-700 underline">
               Inicia sesión
             </Link>
           </>

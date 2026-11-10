@@ -12,8 +12,28 @@ export const requerirUsuario = cache(async () => {
   const { data } = await supabase.auth.getClaims();
   const claims = data?.claims;
   if (!claims?.sub) redirect("/login");
-  return { supabase, userId: claims.sub, email: (claims.email as string | undefined) ?? "" };
+  // Cuenta (negocio) con la que trabaja: la propia (dueño) o la del dueño si es vendedor.
+  const { data: ctx } = await supabase.rpc("mi_contexto");
+  const contexto = (ctx ?? {}) as { cuenta_id?: string; rol?: string };
+  const rol: Rol = contexto.rol === "vendedor" ? "vendedor" : "dueno";
+  return {
+    supabase,
+    userId: claims.sub,
+    cuentaId: contexto.cuenta_id ?? claims.sub,
+    rol,
+    esDueno: rol === "dueno",
+    email: (claims.email as string | undefined) ?? "",
+  };
 });
+
+export type Rol = "dueno" | "vendedor";
+
+/** Para acciones que solo puede hacer el dueño del negocio. */
+export async function requerirDueno() {
+  const sesion = await requerirUsuario();
+  if (!sesion.esDueno) throw new Error("Solo el dueño del negocio puede hacer esto.");
+  return sesion;
+}
 
 /** Solo acepta rutas internas para evitar redirecciones a otros sitios. */
 export function rutaSegura(destino: string | null | undefined, porDefecto = "/dashboard") {
