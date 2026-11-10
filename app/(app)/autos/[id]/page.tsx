@@ -18,6 +18,7 @@ import {
   type TipoDocumento,
 } from "@/lib/dominio";
 import { horaLima, hoyLima } from "@/lib/fechas";
+import { mensajeLimitePlan } from "@/lib/planes";
 import { fecha, formatoPlaca, km, porcentaje, soles, solesConSigno } from "@/lib/formato";
 import { cambiarEstado } from "../acciones";
 import { eliminarDocumento, eliminarGasto } from "./acciones";
@@ -56,7 +57,7 @@ const estilosVencimiento = {
 
 export default async function FichaAuto({ params, searchParams }: PageProps<"/autos/[id]">) {
   const { id } = await params;
-  const { nuevo } = await searchParams;
+  const { nuevo, aviso } = await searchParams;
   const { userId } = await requerirUsuario();
   const [{ auto, gastos, documentos, fotos, vendedor, comprador }, perfil] = await Promise.all([obtenerAuto(id), obtenerPerfil()]);
   const hoy = hoyLima();
@@ -72,6 +73,12 @@ export default async function FichaAuto({ params, searchParams }: PageProps<"/au
           <ChevronLeft className="size-5" aria-hidden /> Mis autos
         </Link>
         {nuevo && <Aviso tipo="exito">¡Auto registrado! Ahora puedes agregar fotos, gastos y documentos.</Aviso>}
+        {(aviso === "limite" || aviso === "sin_plan") && (
+          <Aviso tipo="alerta">
+            {mensajeLimitePlan(aviso === "limite" ? "LIMITE_PLAN" : "SIN_PLAN")}{" "}
+            <Link href="/suscripcion" className="font-semibold underline">Ver planes</Link>
+          </Aviso>
+        )}
         <div className="flex items-start justify-between gap-3">
           <div className="space-y-1">
             <h1 className="text-2xl font-bold leading-tight">

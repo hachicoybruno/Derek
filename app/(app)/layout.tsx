@@ -4,10 +4,13 @@ import { Logo } from "@/components/logo";
 import { BarraInferior, MenuEscritorio } from "@/components/navegacion";
 import { requerirUsuario } from "@/lib/auth";
 import { contarAlertasVencimiento } from "@/lib/datos";
+import { obtenerSuscripcion } from "@/lib/suscripcion";
+import { AvisoSuscripcion } from "@/components/aviso-suscripcion";
 
 export default async function LayoutApp({ children }: LayoutProps<"/">) {
   await requerirUsuario();
-  const alertas = await contarAlertasVencimiento();
+  const suscripcion = await obtenerSuscripcion();
+  const alertas = suscripcion.info?.alertas ? await contarAlertasVencimiento() : 0;
 
   return (
     <div className="flex flex-1 flex-col">
@@ -26,7 +29,10 @@ export default async function LayoutApp({ children }: LayoutProps<"/">) {
           </Link>
         </div>
       </header>
-      <main className="pb-barra mx-auto w-full max-w-5xl flex-1 px-4 pt-4 md:pb-10">{children}</main>
+      <main className="pb-barra mx-auto w-full max-w-5xl flex-1 px-4 pt-4 md:pb-10">
+        <AvisoSuscripcion suscripcion={suscripcion} />
+        {children}
+      </main>
       <BarraInferior alertas={alertas} />
     </div>
   );

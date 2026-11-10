@@ -175,7 +175,17 @@ export function FormularioAuto({
         </div>
       </details>
 
-      {estado.error && <Aviso tipo="error">{estado.error}</Aviso>}
+      {estado.error && (
+        <Aviso tipo={estado.limitePlan ? "alerta" : "error"}>
+          {estado.error}
+          {estado.limitePlan && (
+            <>
+              {" "}
+              <a href="/suscripcion" className="font-semibold underline">Ver planes</a>
+            </>
+          )}
+        </Aviso>
+      )}
       {estado.errores && !estado.error && <Aviso tipo="error">Revisa los campos marcados en rojo.</Aviso>}
 
       <BotonEnviar tamano="lg" className="w-full">

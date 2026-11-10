@@ -18,6 +18,8 @@ export async function insertarDatosEjemplo(supabase: Cliente, userId: string, ho
     .eq("user_id", userId)
     .in("placa", PLACAS_EJEMPLO);
   if (count) return { error: "Los autos de ejemplo ya están cargados." };
+  const { data: plan } = await supabase.rpc("plan_efectivo", { uid: userId });
+  if (!plan) return { error: "Tu prueba gratis o tu suscripción terminó. Elige un plan para cargar autos." };
 
   const d = (dias: number) => sumarDias(hoy, dias);
   const inicioMes = rangoMes(hoy).desde;
@@ -69,7 +71,11 @@ export async function insertarDatosEjemplo(supabase: Cliente, userId: string, ho
     .from("autos")
     .insert(autos.map((a) => ({ ...a, user_id: userId })))
     .select("id, placa");
-  if (error || !insertados) return { error: "No se pudieron crear los autos de ejemplo." };
+  if (error || !insertados) {
+    if (error?.message.includes("SIN_PLAN") || error?.message.includes("LIMITE_PLAN"))
+      return { error: "Tu plan actual no permite agregar estos autos de ejemplo. Revisa tu plan en Suscripción." };
+    return { error: "No se pudieron crear los autos de ejemplo." };
+  }
   const id = (placa: string) => insertados.find((a) => a.placa === placa)!.id;
 
   const gastos = [

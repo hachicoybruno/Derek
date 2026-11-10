@@ -5,6 +5,7 @@ import { z } from "zod";
 import { requerirUsuario } from "@/lib/auth";
 import { COMBUSTIBLES, ESTADOS, TRANSMISIONES } from "@/lib/dominio";
 import { hoyLima } from "@/lib/fechas";
+import { mensajeLimitePlan } from "@/lib/planes";
 import {
   enteroOpcional,
   erroresPorCampo,
@@ -19,7 +20,14 @@ import {
   type ErroresCampo,
 } from "@/lib/validacion";
 
-export type EstadoFormulario = { error?: string; errores?: ErroresCampo; valores?: Record<string, string>; ok?: boolean };
+export type EstadoFormulario = {
+  error?: string;
+  errores?: ErroresCampo;
+  valores?: Record<string, string>;
+  ok?: boolean;
+  /** El error vino de un límite del plan: mostrar enlace a planes. */
+  limitePlan?: boolean;
+};
 
 function esquemaAuto(hoy: string) {
   const anioMax = Number(hoy.slice(0, 4)) + 1;
@@ -66,6 +74,8 @@ function esquemaAuto(hoy: string) {
 
 function mensajeErrorBD(error: { code?: string; message: string }) {
   if (error.code === "23505") return { errores: { placa: "Ya tienes un auto registrado con esa placa." } };
+  const limite = mensajeLimitePlan(error.message);
+  if (limite) return { error: limite, limitePlan: true };
   return { error: "No se pudo guardar. Revisa tu conexión e intenta de nuevo." };
 }
 
@@ -131,8 +141,11 @@ export async function cambiarEstado(formData: FormData) {
     const { data } = await supabase.from("autos").select("fecha_compra").eq("id", id).single();
     if (data && !data.fecha_compra) cambios.fecha_compra = hoyLima();
   }
-  await supabase.from("autos").update(cambios).eq("id", id);
+  const { error } = await supabase.from("autos").update(cambios).eq("id", id);
   revalidatePath("/", "layout");
+  if (error && mensajeLimitePlan(error.message)) {
+    redirect(`/autos/${id}?aviso=${error.message.includes("LIMITE_PLAN") ? "limite" : "sin_plan"}`);
+  }
 }
 
 const esquemaVenta = (hoy: string) =>

@@ -8,6 +8,8 @@ import { calcularAuto, resumenDashboard } from "@/lib/calculos";
 import { listarAutos, listarVencimientos, obtenerPerfil } from "@/lib/datos";
 import { hoyLima } from "@/lib/fechas";
 import { formatoPlaca, porcentaje, soles, solesConSigno } from "@/lib/formato";
+import { obtenerSuscripcion } from "@/lib/suscripcion";
+import { FuncionPro } from "@/components/aviso-suscripcion";
 
 export const metadata: Metadata = { title: "Inicio" };
 
@@ -24,7 +26,10 @@ function Kpi({ titulo, valor, detalle, className }: { titulo: string; valor: Rea
 }
 
 export default async function Dashboard() {
-  const [autos, { documentos }, perfil] = await Promise.all([listarAutos(), listarVencimientos(), obtenerPerfil()]);
+  const [autos, venc, perfil, suscripcion] = await Promise.all([listarAutos(), listarVencimientos(), obtenerPerfil(), obtenerSuscripcion()]);
+  const completo = Boolean(suscripcion.info?.dashboardCompleto);
+  // Las alertas de vencimiento son parte de los planes Pro y Concesionario.
+  const documentos = suscripcion.info?.alertas ? venc.documentos : [];
   const hoy = hoyLima();
   const r = resumenDashboard(autos, hoy);
   const mes = MESES[Number(hoy.slice(5, 7)) - 1];
@@ -78,23 +83,38 @@ export default async function Dashboard() {
             />
             <Kpi
               titulo="Autos en stock"
-              valor={r.autosEnStock + r.autosReservados}
+              valor={
+                suscripcion.info?.limiteStock
+                  ? `${r.autosEnStock + r.autosReservados} / ${suscripcion.info.limiteStock}`
+                  : r.autosEnStock + r.autosReservados
+              }
               detalle={[r.autosReservados && `${r.autosReservados} reservado${r.autosReservados > 1 ? "s" : ""}`, r.autosEnEvaluacion && `${r.autosEnEvaluacion} en evaluación`].filter(Boolean).join(" · ") || undefined}
             />
+            {completo && (
             <Kpi
               titulo="Días promedio en stock"
               valor={r.diasPromedioStock === null ? "—" : Math.round(r.diasPromedioStock)}
               detalle={r.diasPromedioStock === null ? undefined : "días"}
             />
+            )}
+            {completo && (
             <Kpi
               className="col-span-2 lg:col-span-1"
               titulo="Capital inmovilizado"
               valor={soles(r.capitalInmovilizado, { redondear: true })}
               detalle={r.gananciaProyectadaStock ? `Ganancia proyectada: ${solesConSigno(r.gananciaProyectadaStock, { redondear: true })}` : "Plata invertida en autos sin vender"}
             />
+            )}
           </div>
 
-          {masTiempo.length > 0 && masTiempo[0].dias > 0 && (
+          {!completo && (
+            <FuncionPro
+              titulo="Dashboard completo"
+              texto="Capital inmovilizado, días promedio en stock, autos que llevan más tiempo y margen por marca y modelo están en los planes Pro y Concesionario."
+            />
+          )}
+
+          {completo && masTiempo.length > 0 && masTiempo[0].dias > 0 && (
             <Seccion titulo="Llevan más tiempo en stock">
               <Tarjeta className="divide-y divide-slate-100 p-0">
                 {masTiempo.map(({ auto, dias }) => (
@@ -113,6 +133,7 @@ export default async function Dashboard() {
             </Seccion>
           )}
 
+          {completo && (
           <Seccion titulo="Margen por marca y modelo">
             {r.porModelo.length === 0 ? (
               <Tarjeta className="text-slate-600">Cuando vendas tu primer auto verás aquí qué modelos te dejan más ganancia.</Tarjeta>
@@ -148,6 +169,7 @@ export default async function Dashboard() {
               </Tarjeta>
             )}
           </Seccion>
+          )}
         </>
       )}
     </div>

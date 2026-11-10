@@ -6,6 +6,8 @@ import { estadoVencimiento } from "@/lib/calculos";
 import { DIAS_AVISO_VENCIMIENTO, listarVencimientos, type Vencimiento } from "@/lib/datos";
 import { ETIQUETA_DOCUMENTO, type TipoDocumento } from "@/lib/dominio";
 import { fecha, formatoPlaca } from "@/lib/formato";
+import { obtenerSuscripcion } from "@/lib/suscripcion";
+import { FuncionPro } from "@/components/aviso-suscripcion";
 
 export const metadata: Metadata = { title: "Vencimientos" };
 
@@ -45,6 +47,18 @@ function Fila({ doc, hoy }: { doc: Vencimiento; hoy: string }) {
 }
 
 export default async function Vencimientos() {
+  const suscripcion = await obtenerSuscripcion();
+  if (!suscripcion.info?.alertas) {
+    return (
+      <div className="mx-auto max-w-3xl space-y-4">
+        <h1 className="text-2xl font-bold">Vencimientos</h1>
+        <FuncionPro
+          titulo="Alertas de SOAT y revisión técnica"
+          texto="Con el plan Pro ves en un solo lugar los documentos vencidos y los que vencen en los próximos 30 días, y recibes avisos por correo y WhatsApp. En tu plan actual puedes ver la fecha de cada documento en la ficha del auto."
+        />
+      </div>
+    );
+  }
   const { hoy, documentos } = await listarVencimientos();
   const vencidos = documentos.filter((d) => d.fecha_vencimiento! < hoy);
   const proximos = documentos.filter((d) => d.fecha_vencimiento! >= hoy);
