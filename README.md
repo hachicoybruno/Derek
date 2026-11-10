@@ -49,6 +49,21 @@ Usuario demo: `demo@flipdesk.pe` / `demo12345`.
 | `npm run db:start` / `db:stop` / `db:reset` | Supabase local (`db:reset` borra los datos y reaplica migraciones) |
 | `npm run seed` | Crea el usuario demo con 5 autos de ejemplo |
 
+## Cómo probar la Fase 1
+
+Con `npm run dev` corriendo y el usuario demo cargado (`npm run seed`), abre http://localhost:3000 (en Chrome usa el modo celular con F12 → ícono de dispositivo):
+
+1. **Landing** en `/` → "Ya tengo cuenta" → entra con `demo@flipdesk.pe` / `demo12345`.
+2. **Dashboard:** ganancia del mes, autos en stock, capital inmovilizado, días promedio, margen por modelo y el aviso rojo de vencimientos.
+3. **Autos:** filtra por estado y busca `dem-103`, `kia` o `toyota yaris`. Descarga el **Excel**.
+4. **Botón +:** registra un auto (placa, año, marca, modelo y precio) y guarda.
+5. **Ficha:** sube fotos, agrega un gasto (el costo y la ganancia proyectada se recalculan), agrega un SOAT que venza en pocos días, registra al vendedor y luego "Registrar venta".
+6. **Anuncios:** en la ficha de un auto sin vender → "Crear anuncios…" → cambia de pestaña y copia.
+7. **¿Lo compro?:** prueba 28,000 + 2,000 → 36,000 (verde) y 32,000 + 2,000 → 36,000 (rojo). Cambia los umbrales en **Ajustes** (⚙️).
+8. **Vencimientos:** muestra el SOAT vencido y los que vencen en los próximos 30 días.
+9. **PWA:** con `npm run build && npm start`, Chrome ofrece "Instalar app"; sin conexión aparece la página "Estás sin conexión".
+10. **Cuenta nueva:** regístrate con otro correo, no verás los autos del demo (RLS). Usa "Cargar 5 autos de ejemplo".
+
 ## Variables de entorno
 
 Ver [`.env.example`](.env.example). Nunca subas claves al repositorio.
@@ -90,7 +105,8 @@ Las migraciones están en `supabase/migrations/`. Incluyen tablas, Row Level Sec
 
 1. Importa el repositorio en [vercel.com/new](https://vercel.com/new) (framework: Next.js, sin cambios en el build).
 2. En **Settings → Environment Variables** agrega `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` y `NEXT_PUBLIC_SITE_URL` (la URL final de Vercel). `SUPABASE_SECRET_KEY` **no** es necesaria en Vercel.
-3. Deploy.
+3. Deploy. `vercel.json` fija la región `gru1` (São Paulo), cerca de Lima y de Supabase `sa-east-1`.
+4. Si cambias el dominio, actualiza `NEXT_PUBLIC_SITE_URL` y las Redirect URLs de Supabase.
 
 ## Estructura
 

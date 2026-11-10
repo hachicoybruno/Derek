@@ -16,6 +16,10 @@ Registro de decisiones tomadas cuando algo era ambiguo. Se eligió siempre la op
 | T8 | **Las relaciones entre tablas incluyen `user_id`** (claves foráneas compuestas). | Impide enlazar un gasto, foto o contacto a un auto de otro usuario aunque se conozca su id. |
 | T9 | **Sin `next/image` para fotos de autos;** se usa `<img loading="lazy">` con miniaturas ya comprimidas. | Las URLs firmadas cambian cada hora y el optimizador de imágenes de Vercel tiene costo por uso. |
 | T10 | **Supabase local para desarrollo** (`npx supabase start`). | Permite probar RLS y storage sin tocar producción. |
+| T11 | **Vercel en la región `gru1` (São Paulo)** vía `vercel.json`. | Es la más cercana a Lima y a Supabase `sa-east-1`; menos latencia por petición. |
+| T12 | **El service worker no guarda páginas con datos del usuario,** solo archivos estáticos y una página "sin conexión". | Privacidad (celulares compartidos) y evitar mostrar datos viejos. La app requiere conexión. |
+| T13 | **La calculadora "¿lo compro?" corre en el navegador** (sin ir al servidor). | Respuesta instantánea mientras se escribe, incluso con mala señal. |
+| T14 | **Anuncios generados a pedido** (botón) y no al abrir la ficha. | Hoy es instantáneo con plantillas, pero cuando se conecte IA cada generación tendrá costo. A la IA nunca se le envían placa, DNI ni teléfonos. |
 
 ## De negocio
 
@@ -37,3 +41,9 @@ Registro de decisiones tomadas cuando algo era ambiguo. Se eligió siempre la op
 | N14 | **Datos de ejemplo:** botón "Cargar 5 autos de ejemplo" dentro de la app (para la cuenta actual) y script `npm run seed` que crea un usuario demo. |
 | N15 | **Moneda y formatos:** soles (`S/ 45,250.50`, formato es-PE), fechas `DD/MM/AAAA`, zona horaria `America/Lima` para todo cálculo de "hoy". |
 | N16 | **Sin recuperación de contraseña en la Fase 1** (no fue pedida). Queda pendiente. |
+| N17 | **Búsqueda:** cada palabra debe coincidir con placa, marca, modelo o versión ("toyota yaris", "abc-123", "ABC 123"). |
+| N18 | **Venta:** se registra desde la ficha con "Registrar venta" (precio final + fecha). Se puede "Deshacer venta", que devuelve el auto a *en stock*. |
+| N19 | **Al pasar un auto de "en evaluación" a stock/reservado sin fecha de compra,** se asume la fecha de hoy. |
+| N20 | **Máximo 20 fotos por auto** (10 MB por archivo antes de comprimir). |
+| N21 | **Los anuncios no muestran la placa** y el precio usado es el objetivo. Se indica "SOAT/revisión vigente" solo si hay un documento con fecha futura. |
+| N22 | **Exportar a Excel** descarga los autos con el filtro y la búsqueda que se ven en pantalla, con una fila de totales. |
