@@ -82,3 +82,20 @@ Registro de decisiones tomadas cuando algo era ambiguo. Se eligió siempre la op
 | P11 | **Cambio de plan = nueva suscripción;** al activarse, la anterior se cancela en PayPal automáticamente. No se prorratea. |
 | P12 | **Cancelar** mantiene el acceso hasta el fin del periodo pagado. Hay 5 días de gracia si un webhook de renovación llega tarde. |
 | P13 | **Concesionario = hasta 5 usuarios** (dueño + vendedores), implementado en la Fase 4. |
+
+## Fase 4 — Alertas y equipo
+
+| # | Decisión |
+|---|----------|
+| E1 | **La cuenta del negocio es el id del dueño.** Las filas siguen usando `user_id`, que ahora significa "cuenta". Se evitó migrar todas las tablas a un `cuenta_id` nuevo. `cuenta_actual()` devuelve la cuenta con la que trabaja el usuario (la suya o la de su dueño). |
+| E2 | **Un usuario pertenece a un solo negocio.** Para unirse a otro hay que salir del equipo. No se puede aceptar una invitación si la cuenta ya tiene autos propios (evita que sus datos "desaparezcan"). |
+| E3 | **Roles: dueño y vendedor.** El vendedor hace todo lo operativo; no elimina registros (autos, gastos, documentos, fotos), ni edita plantillas, datos del negocio, suscripción o equipo. Validado en RLS, no solo en la interfaz. |
+| E4 | **El vendedor ve precios de compra, gastos y ganancias** (ficha, dashboard y Excel). Ocultarlos de forma segura requiere vistas/columnas separadas; queda pendiente si el negocio lo necesita. |
+| E5 | **Invitación por enlace** atado al correo invitado, válida 7 días y de un solo uso. Se comparte copiando, por WhatsApp (wa.me) o por correo si Resend está configurado. |
+| E6 | **Equipo solo con plan Concesionario, máximo 5 usuarios** (dueño + 4). Si el negocio baja de plan, la membresía queda inactiva (los vendedores ven su cuenta vacía) hasta que vuelva a Concesionario. |
+| E7 | **Datos del negocio** (nombre legal, DNI, dirección, ciudad, umbrales y alertas) están en el perfil del dueño; los vendedores los leen, cada uno edita solo su nombre. |
+| E8 | **Alertas: cron diario a las 8:00 de Lima** (Vercel Cron, protegido con `CRON_SECRET`). Umbrales 30, 7, 1 y 0 días; se usa "el menor umbral alcanzado" para no perder avisos si el cron no corrió un día o el documento se registró tarde. |
+| E9 | **Un aviso por documento, umbral y canal** (tabla `alertas_enviadas`). Se envía un solo mensaje por cuenta y canal con todos los documentos pendientes. |
+| E10 | **Correo con Resend y WhatsApp con la Cloud API de Meta**, detrás de interfaces (`EnviadorCorreo`, `EnviadorWhatsapp`). WhatsApp exige una plantilla aprobada; el resumen va en un parámetro de una línea (máx. 3 documentos y "y N más"). |
+| E11 | **Las alertas van solo al dueño** (correo de la cuenta o uno alternativo, y un celular). Los vendedores ven los vencimientos en la app. |
+| E12 | **Celulares:** se acepta "987 654 321" y se guarda como `+51987654321` (Perú por defecto). |

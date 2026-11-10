@@ -89,6 +89,10 @@ Ver [`.env.example`](.env.example). Nunca subas claves al repositorio.
 | `PAYPAL_ENTORNO` / `PAYPAL_CLIENT_ID` / `PAYPAL_CLIENT_SECRET` | Credenciales de la app de PayPal | **No** (el Client ID sí es público) |
 | `PAYPAL_WEBHOOK_ID` | Verificar la firma de los webhooks | **No** |
 | `PAYPAL_PLAN_BASICO` / `_PRO` / `_CONCESIONARIO` | IDs de los planes en PayPal | No |
+| `CRON_SECRET` | Protege el cron diario de alertas | **No** |
+| `RESEND_API_KEY` / `CORREO_REMITENTE` | Envío de correos (alertas e invitaciones) | **No** / No |
+| `WHATSAPP_TOKEN` / `WHATSAPP_PHONE_NUMBER_ID` | WhatsApp Business Cloud API | **No** / No |
+| `WHATSAPP_PLANTILLA` / `WHATSAPP_IDIOMA` / `WHATSAPP_API_VERSION` | Plantilla aprobada para las alertas | No |
 
 ## Base de datos
 
@@ -140,6 +144,36 @@ PayPal muestra dos botones: **PayPal** y **Tarjeta de débito o crédito** (sin 
 2. Toca la franja → **Elegir Básico** → "Pagar con tarjeta (simulado)". El plan queda activo.
 3. Registra 6 autos: el sexto muestra el límite del Básico. El dashboard muestra "5 / 5" y las funciones Pro bloqueadas.
 4. **Cambiar a Pro** → pagar → límites quitados. Luego **Cancelar suscripción**: sigues con acceso hasta fin de periodo.
+
+## Equipo y alertas (Fase 4)
+
+### Equipo (plan Concesionario)
+
+- El **dueño** invita vendedores desde **Ajustes → Equipo** (hasta 4 vendedores, 5 usuarios en total). El enlace se puede copiar, mandar por WhatsApp o, si Resend está configurado, llega por correo. Vence en 7 días y solo lo puede aceptar el correo invitado.
+- El **vendedor** ve y registra autos, fotos, gastos, documentos y ventas del negocio, crea anuncios y contratos. **No puede** eliminar registros, ni cambiar plantillas, datos del negocio, suscripción o equipo. Esto se valida también en la base de datos (RLS).
+- Si el negocio deja el plan Concesionario, los vendedores pierden el acceso automáticamente (sus cuentas siguen existiendo).
+
+### Alertas por correo y WhatsApp (planes Pro y Concesionario)
+
+Un **cron diario** (`vercel.json`: 13:00 UTC = 8:00 en Lima) llama a `/api/cron/alertas` y avisa cuando un SOAT o una revisión técnica de un auto no vendido vence en **30, 7 y 1 día y el mismo día** (o si ya venció). Cada aviso se envía una sola vez por canal. El dueño elige canales y destinos en **Ajustes → Alertas de vencimiento** y puede mandar un **aviso de prueba**.
+
+1. **Cron:** define `CRON_SECRET` en Vercel (cualquier texto largo y aleatorio). Vercel lo envía automáticamente al ejecutar el cron.
+2. **Correo con Resend:** crea una cuenta en [resend.com](https://resend.com), verifica tu dominio y crea una API key → `RESEND_API_KEY`. Define `CORREO_REMITENTE` (p. ej. `FLIPDESK <avisos@tu-dominio.pe>`).
+3. **WhatsApp Business Cloud API:**
+   1. En [developers.facebook.com](https://developers.facebook.com/) crea una app tipo *Business* y agrega el producto **WhatsApp**. Registra tu número de empresa.
+   2. Copia el **Phone number ID** → `WHATSAPP_PHONE_NUMBER_ID` y genera un **token permanente** (usuario del sistema) → `WHATSAPP_TOKEN`.
+   3. En *WhatsApp Manager → Plantillas* crea una plantilla de categoría **Utilidad**, idioma Español, llamada `alerta_vencimientos`, con el cuerpo: `Hola, FLIPDESK te avisa: {{1}}. Revisa tus vencimientos en la app.` Espera la aprobación de Meta.
+   4. Define `WHATSAPP_PLANTILLA=alerta_vencimientos` y `WHATSAPP_IDIOMA` con el código de idioma de la plantilla (`es`, `es_PE`…).
+
+Sin estas variables la app funciona igual; el aviso de prueba indica qué falta configurar.
+
+### Cómo probar la Fase 4
+
+1. Con el usuario demo: **Suscripción → Concesionario → pagar (simulado)**.
+2. **Ajustes → Equipo** → invita `vendedor@test.pe` → copia el enlace.
+3. En otra ventana de incógnito abre el enlace → **Crear mi cuenta** (el correo viene precargado) → **Unirme al equipo**. El vendedor ve los 5 autos del demo, puede agregar gastos y no ve botones de eliminar.
+4. **Ajustes → Alertas** → activa correo/WhatsApp → **Enviar aviso de prueba**. En local, sin Resend ni WhatsApp, verás qué variable falta.
+5. Cron manual: `curl -H "Authorization: Bearer $CRON_SECRET" http://localhost:3000/api/cron/alertas`.
 
 ## Estructura
 
