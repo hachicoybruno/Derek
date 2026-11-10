@@ -1,0 +1,45 @@
+"use client";
+import { useActionState } from "react";
+import { BotonEnviar } from "@/components/boton-enviar";
+import { Aviso, Campo, Entrada } from "@/components/ui";
+import type { EstadoFormulario } from "../autos/acciones";
+import { guardarAjustes } from "./acciones";
+
+type Perfil = { nombre: string | null; negocio: string | null; umbral_verde: number; umbral_amarillo: number };
+
+export function FormularioAjustes({ perfil }: { perfil: Perfil }) {
+  const [estado, accion] = useActionState<EstadoFormulario, FormData>(guardarAjustes, {});
+  const e = estado.errores ?? {};
+  const v = (campo: keyof Perfil) => estado.valores?.[campo] ?? String(perfil[campo] ?? "");
+
+  return (
+    <form action={accion} className="space-y-5" noValidate>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <Campo etiqueta="Tu nombre">
+          <Entrada name="nombre" defaultValue={v("nombre")} autoComplete="name" />
+        </Campo>
+        <Campo etiqueta="Nombre del negocio (opcional)">
+          <Entrada name="negocio" defaultValue={v("negocio")} placeholder="Ej. Autos Andree" />
+        </Campo>
+      </div>
+
+      <fieldset className="space-y-3">
+        <legend className="font-bold">Semáforo de la calculadora</legend>
+        <p className="text-sm text-slate-600">Margen mínimo para considerar que un auto es buen negocio.</p>
+        <div className="grid grid-cols-2 gap-3">
+          <Campo etiqueta="🟢 Verde desde (%)" error={e.umbral_verde}>
+            <Entrada name="umbral_verde" inputMode="decimal" defaultValue={v("umbral_verde")} aria-invalid={Boolean(e.umbral_verde)} />
+          </Campo>
+          <Campo etiqueta="🟡 Amarillo desde (%)" error={e.umbral_amarillo}>
+            <Entrada name="umbral_amarillo" inputMode="decimal" defaultValue={v("umbral_amarillo")} aria-invalid={Boolean(e.umbral_amarillo)} />
+          </Campo>
+        </div>
+        <p className="text-sm text-slate-500">🔴 Rojo: por debajo del amarillo.</p>
+      </fieldset>
+
+      {estado.error && <Aviso tipo="error">{estado.error}</Aviso>}
+      {estado.ok && <Aviso tipo="exito">Ajustes guardados.</Aviso>}
+      <BotonEnviar className="w-full">Guardar ajustes</BotonEnviar>
+    </form>
+  );
+}

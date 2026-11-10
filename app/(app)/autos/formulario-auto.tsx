@@ -18,13 +18,24 @@ export type ValoresAuto = Partial<Record<string, string | number | null>>;
 
 const texto = (v: string | number | null | undefined) => (v === null || v === undefined ? "" : String(v));
 
-export function FormularioAuto({ auto, hoy }: { auto?: ValoresAuto & { id?: string }; hoy: string }) {
+export function FormularioAuto({
+  auto,
+  hoy,
+  inicial = {},
+}: {
+  auto?: ValoresAuto & { id?: string };
+  hoy: string;
+  inicial?: Record<string, string>;
+}) {
   const [estado, accion] = useActionState<EstadoFormulario, FormData>(guardarAuto, {});
   const editando = Boolean(auto?.id);
-  const v = (campo: string, porDefecto = "") => estado.valores?.[campo] ?? (auto ? texto(auto[campo]) : porDefecto);
+  const v = (campo: string, porDefecto = "") =>
+    estado.valores?.[campo] ?? (auto ? texto(auto[campo]) : (inicial[campo] ?? porDefecto));
   const e = estado.errores ?? {};
 
-  const [estadoAuto, setEstadoAuto] = useState<Estado>(((estado.valores?.estado ?? auto?.estado) as Estado) ?? "en_stock");
+  const [estadoAuto, setEstadoAuto] = useState<Estado>(
+    ((estado.valores?.estado ?? auto?.estado ?? inicial.estado) as Estado) ?? "en_stock",
+  );
   const opcionesEstado: Estado[] = editando ? ["en_evaluacion", "en_stock", "reservado", "vendido"] : ["en_stock", "en_evaluacion", "reservado"];
   const comprado = estadoAuto !== "en_evaluacion";
   const tieneMasDatos = Boolean(auto?.version || auto?.color || auto?.kilometraje || auto?.transmision || auto?.combustible || auto?.notas);
