@@ -80,6 +80,10 @@ describe.skipIf(!hayDb)("servicio de suscripciones", () => {
   let db: SupabaseClient<Database>;
   let userId: string;
   const falso = new ProveedorFalso();
+  // Ids únicos por corrida: la columna proveedor_suscripcion_id es única en la base.
+  const run = Date.now().toString(36).toUpperCase();
+  const PRIMERA = `I-PRIMERA${run}`;
+  const SEGUNDA = `I-SEGUNDA${run}`;
   const deps = () => ({ db, proveedor: () => falso });
   const ext = (id: string, cambios: Partial<SuscripcionExterna> = {}): SuscripcionExterna => ({
     id, proveedor: "paypal", estado: "activa", plan: "pro", usuarioId: userId, periodoHasta: "2026-12-10T00:00:00Z", ...cambios,
@@ -92,15 +96,15 @@ describe.skipIf(!hayDb)("servicio de suscripciones", () => {
   });
 
   it("activa la suscripción y conserva la fecha de fin de prueba", async () => {
-    await aplicarSuscripcion(deps(), userId, ext("I-PRIMERA"));
+    await aplicarSuscripcion(deps(), userId, ext(PRIMERA));
     const f = await fila();
-    expect(f).toMatchObject({ estado: "activa", plan: "pro", proveedor: "paypal", proveedor_suscripcion_id: "I-PRIMERA" });
+    expect(f).toMatchObject({ estado: "activa", plan: "pro", proveedor: "paypal", proveedor_suscripcion_id: PRIMERA });
     expect(f.prueba_hasta).not.toBeNull();
   });
 
   it("un webhook de pago registra el cobro y es idempotente", async () => {
-    falso.estados.set("I-PRIMERA", ext("I-PRIMERA", { periodoHasta: "2027-01-10T00:00:00Z" }));
-    const evento = { id: `WH-${Date.now()}`, tipo: "pago" as const, estado: "completado" as const, pagoId: `SALE-${Date.now()}`, suscripcionId: "I-PRIMERA", monto: 32, moneda: "USD", usuarioId: null };
+    falso.estados.set(PRIMERA, ext(PRIMERA, { periodoHasta: "2027-01-10T00:00:00Z" }));
+    const evento = { id: `WH-${Date.now()}`, tipo: "pago" as const, estado: "completado" as const, pagoId: `SALE-${Date.now()}`, suscripcionId: PRIMERA, monto: 32, moneda: "USD", usuarioId: null };
     expect((await procesarEvento(deps(), "paypal", evento, {})).resultado).toBe("ok");
     expect((await procesarEvento(deps(), "paypal", evento, {})).resultado).toBe("duplicado");
     const { data: pagos } = await db.from("pagos").select("monto, plan").eq("user_id", userId);
@@ -109,18 +113,18 @@ describe.skipIf(!hayDb)("servicio de suscripciones", () => {
   });
 
   it("cambio de plan: cancela la suscripción anterior e ignora sus eventos tardíos", async () => {
-    await aplicarSuscripcion(deps(), userId, ext("I-SEGUNDA", { plan: "concesionario" }));
-    expect(falso.canceladas).toContain("I-PRIMERA");
+    await aplicarSuscripcion(deps(), userId, ext(SEGUNDA, { plan: "concesionario" }));
+    expect(falso.canceladas).toContain(PRIMERA);
     expect((await fila()).plan).toBe("concesionario");
 
-    falso.estados.set("I-PRIMERA", ext("I-PRIMERA", { estado: "cancelada" }));
-    await procesarEvento(deps(), "paypal", { id: `WH-c-${Date.now()}`, tipo: "suscripcion", suscripcionId: "I-PRIMERA", usuarioId: userId }, {});
-    expect(await fila()).toMatchObject({ estado: "activa", proveedor_suscripcion_id: "I-SEGUNDA" });
+    falso.estados.set(PRIMERA, ext(PRIMERA, { estado: "cancelada" }));
+    await procesarEvento(deps(), "paypal", { id: `WH-c-${Date.now()}`, tipo: "suscripcion", suscripcionId: PRIMERA, usuarioId: userId }, {});
+    expect(await fila()).toMatchObject({ estado: "activa", proveedor_suscripcion_id: SEGUNDA });
   });
 
   it("cancelación de la suscripción vigente conserva el fin del periodo pagado", async () => {
-    falso.estados.set("I-SEGUNDA", ext("I-SEGUNDA", { estado: "cancelada", periodoHasta: null, plan: "concesionario" }));
-    await procesarEvento(deps(), "paypal", { id: `WH-d-${Date.now()}`, tipo: "suscripcion", suscripcionId: "I-SEGUNDA", usuarioId: null }, {});
+    falso.estados.set(SEGUNDA, ext(SEGUNDA, { estado: "cancelada", periodoHasta: null, plan: "concesionario" }));
+    await procesarEvento(deps(), "paypal", { id: `WH-d-${Date.now()}`, tipo: "suscripcion", suscripcionId: SEGUNDA, usuarioId: null }, {});
     const f = await fila();
     expect(f.estado).toBe("cancelada");
     expect(f.periodo_hasta).toContain("2026-12-10");
