@@ -11,7 +11,7 @@ export const metadata: Metadata = { title: "Editar auto" };
 
 export default async function EditarAuto({ params }: PageProps<"/autos/[id]/editar">) {
   const { id } = await params;
-  const [{ auto }, { esDueno }] = await Promise.all([obtenerAuto(id), requerirUsuario()]);
+  const [{ auto }, { esDueno, verCostos }] = await Promise.all([obtenerAuto(id), requerirUsuario()]);
   return (
     <div className="mx-auto max-w-xl space-y-4">
       <Link href={`/autos/${id}`} className="inline-flex min-h-11 items-center gap-1 font-semibold text-marca-700">
@@ -20,7 +20,7 @@ export default async function EditarAuto({ params }: PageProps<"/autos/[id]/edit
       <h1 className="text-2xl font-bold">
         Editar {auto.marca} {auto.modelo}
       </h1>
-      <FormularioAuto auto={auto} hoy={hoyLima()} />
+      <FormularioAuto auto={auto} hoy={hoyLima()} verCostos={verCostos} />
       {esDueno && (
         <div className="border-t border-slate-200 pt-4">
           <BotonEliminarAuto id={id} />

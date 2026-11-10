@@ -219,14 +219,14 @@ isOneToOne: false
                   ]
                 },"perfiles": {
                   Row: {
-                    "alertas_email": boolean,"alertas_whatsapp": boolean,"ciudad": string,"correo_alertas": string | null,"created_at": string,"direccion": string | null,"dni": string | null,"id": string,"negocio": string | null,"nombre": string | null,"telefono": string | null,"umbral_amarillo": number,"umbral_verde": number,"updated_at": string,"whatsapp": string | null
+                    "alertas_email": boolean,"alertas_whatsapp": boolean,"ciudad": string,"correo_alertas": string | null,"created_at": string,"direccion": string | null,"dni": string | null,"id": string,"negocio": string | null,"nombre": string | null,"telefono": string | null,"umbral_amarillo": number,"umbral_verde": number,"updated_at": string,"vendedores_ven_costos": boolean,"whatsapp": string | null
                   }
                   ComputedFields: never
                   Insert: {
-                    "alertas_email"?: boolean,"alertas_whatsapp"?: boolean,"ciudad"?: string,"correo_alertas"?: string | null,"created_at"?: string,"direccion"?: string | null,"dni"?: string | null,"id": string,"negocio"?: string | null,"nombre"?: string | null,"telefono"?: string | null,"umbral_amarillo"?: number,"umbral_verde"?: number,"updated_at"?: string,"whatsapp"?: string | null
+                    "alertas_email"?: boolean,"alertas_whatsapp"?: boolean,"ciudad"?: string,"correo_alertas"?: string | null,"created_at"?: string,"direccion"?: string | null,"dni"?: string | null,"id": string,"negocio"?: string | null,"nombre"?: string | null,"telefono"?: string | null,"umbral_amarillo"?: number,"umbral_verde"?: number,"updated_at"?: string,"vendedores_ven_costos"?: boolean,"whatsapp"?: string | null
                   }
                   Update: {
-                    "alertas_email"?: boolean,"alertas_whatsapp"?: boolean,"ciudad"?: string,"correo_alertas"?: string | null,"created_at"?: string,"direccion"?: string | null,"dni"?: string | null,"id"?: string,"negocio"?: string | null,"nombre"?: string | null,"telefono"?: string | null,"umbral_amarillo"?: number,"umbral_verde"?: number,"updated_at"?: string,"whatsapp"?: string | null
+                    "alertas_email"?: boolean,"alertas_whatsapp"?: boolean,"ciudad"?: string,"correo_alertas"?: string | null,"created_at"?: string,"direccion"?: string | null,"dni"?: string | null,"id"?: string,"negocio"?: string | null,"nombre"?: string | null,"telefono"?: string | null,"umbral_amarillo"?: number,"umbral_verde"?: number,"updated_at"?: string,"vendedores_ven_costos"?: boolean,"whatsapp"?: string | null
                   }
                   Relationships: [
                     
@@ -282,6 +282,32 @@ isOneToOne: false
       referencedColumns: ["id","user_id"]
     }
                   ]
+                },"gastos_vista": {
+                  Row: {
+                    "auto_id": string,"categoria": string,"created_at": string,"descripcion": string | null,"fecha": string,"id": string,"monto": number | null,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                           "auto_id"?: string | null,"categoria"?: string | null,"created_at"?: string | null,"descripcion"?: string | null,"fecha"?: string | null,"id"?: string | null,"monto"?: never,"user_id"?: string | null
+                         }
+                        Update: {
+                           "auto_id"?: string | null,"categoria"?: string | null,"created_at"?: string | null,"descripcion"?: string | null,"fecha"?: string | null,"id"?: string | null,"monto"?: never,"user_id"?: string | null
+                         }
+                        Relationships: [
+                    {
+      foreignKeyName: "gastos_auto_id_user_id_fkey"
+      columns: ["auto_id","user_id"]
+isOneToOne: false
+      referencedRelation: "autos"
+      referencedColumns: ["id","user_id"]
+    },{
+      foreignKeyName: "gastos_auto_id_user_id_fkey"
+      columns: ["auto_id","user_id"]
+isOneToOne: false
+      referencedRelation: "autos_resumen"
+      referencedColumns: ["id","user_id"]
+    }
+                  ]
                 }
           }
           Functions: {
@@ -307,6 +333,9 @@ isOneToOne: false
                            },
 "plan_efectivo":
 { Args: { "uid": string }; Returns: string
+                           },
+"puede_ver_costos":
+{ Args: Record<PropertyKey, never>; Returns: boolean
                            },
 "rol_actual":
 { Args: Record<PropertyKey, never>; Returns: string

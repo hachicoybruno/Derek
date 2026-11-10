@@ -10,7 +10,7 @@ import { enlaceInvitacion } from "@/lib/equipo";
 import { INFO_PLANES } from "@/lib/planes";
 import { siteUrl } from "@/lib/supabase/env";
 import { obtenerSuscripcion } from "@/lib/suscripcion";
-import { quitarMiembro, revocarInvitacion, salirDelEquipo } from "./acciones";
+import { cambiarVisibilidadCostos, quitarMiembro, revocarInvitacion, salirDelEquipo } from "./acciones";
 import { CompartirEnlace, FormularioInvitar } from "./formulario-invitar";
 
 export const metadata: Metadata = { title: "Equipo" };
@@ -88,6 +88,22 @@ export default async function Equipo() {
               </Tarjeta>
             </Seccion>
           )}
+
+          <Seccion titulo="Costos y ganancias">
+            <Tarjeta className="space-y-3">
+              <p className="text-slate-700">
+                {perfil.vendedores_ven_costos
+                  ? "Tus vendedores ven el precio de compra, los gastos, el costo total y la ganancia de cada auto."
+                  : "Tus vendedores NO ven el precio de compra, los montos de gastos ni las ganancias. Sí ven el precio de venta."}
+              </p>
+              <form action={cambiarVisibilidadCostos}>
+                <input type="hidden" name="ver" value={perfil.vendedores_ven_costos ? "no" : "si"} />
+                <BotonEnviar variante="secundario" className="w-full" textoCargando="Guardando…">
+                  {perfil.vendedores_ven_costos ? "Ocultar costos a los vendedores" : "Mostrar costos a los vendedores"}
+                </BotonEnviar>
+              </form>
+            </Tarjeta>
+          </Seccion>
 
           <Tarjeta className="space-y-1 text-sm text-slate-600">
             <p className="font-semibold text-slate-900">¿Qué puede hacer un vendedor?</p>

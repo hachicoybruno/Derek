@@ -66,7 +66,7 @@ describe.skipIf(!hayDb)("equipo", () => {
 
   it("el vendedor trabaja en la cuenta del dueño", async () => {
     const { dueno, vendedor } = usuarios;
-    expect((await vendedor.cliente.rpc("mi_contexto")).data).toEqual({ cuenta_id: dueno.id, rol: "vendedor" });
+    expect((await vendedor.cliente.rpc("mi_contexto")).data).toMatchObject({ cuenta_id: dueno.id, rol: "vendedor" });
     const autos = await vendedor.cliente.from("autos").select("id");
     expect(autos.data?.map((a) => a.id)).toContain(autoDelDueno);
 
@@ -88,6 +88,42 @@ describe.skipIf(!hayDb)("equipo", () => {
     expect((await vendedor.cliente.from("pagos").select("id")).data).toEqual([]);
   });
 
+  it("el vendedor no puede leer costos (a menos que el dueño lo permita)", async () => {
+    const { dueno, vendedor } = usuarios;
+    // Lectura directa de la columna: denegada para todos los usuarios (dueño incluido).
+    expect((await vendedor.cliente.from("autos").select("precio_compra")).error).not.toBeNull();
+    expect((await dueno.cliente.from("autos").select("precio_compra")).error).not.toBeNull();
+    expect((await vendedor.cliente.from("gastos").select("monto")).error).not.toBeNull();
+
+    // Por las vistas: el dueño ve, el vendedor recibe null.
+    const delDueno = await dueno.cliente.from("autos_resumen").select("precio_compra, total_gastos").eq("id", autoDelDueno).single();
+    expect(Number(delDueno.data?.precio_compra)).toBe(80000);
+    expect(Number(delDueno.data?.total_gastos)).toBe(50);
+    const delVendedor = await vendedor.cliente.from("autos_resumen").select("precio_compra, total_gastos, precio_venta_objetivo").eq("id", autoDelDueno).single();
+    expect(delVendedor.data?.precio_compra).toBeNull();
+    expect(delVendedor.data?.total_gastos).toBeNull();
+    expect((await vendedor.cliente.from("gastos_vista").select("monto")).data?.every((g) => g.monto === null)).toBe(true);
+    expect((await vendedor.cliente.rpc("mi_contexto")).data).toMatchObject({ ver_costos: false });
+
+    // El vendedor puede editar el auto sin tocar el precio y registrar gastos (escribir sí, leer no).
+    expect((await vendedor.cliente.from("autos").update({ color: "Blanco" }).eq("id", autoDelDueno)).error).toBeNull();
+    expect(Number((await dueno.cliente.from("autos_resumen").select("precio_compra").eq("id", autoDelDueno).single()).data?.precio_compra)).toBe(80000);
+
+    // Si el dueño lo permite, el vendedor ve los costos.
+    await dueno.cliente.from("perfiles").update({ vendedores_ven_costos: true }).eq("id", dueno.id);
+    expect(Number((await vendedor.cliente.from("autos_resumen").select("precio_compra").eq("id", autoDelDueno).single()).data?.precio_compra)).toBe(80000);
+    await dueno.cliente.from("perfiles").update({ vendedores_ven_costos: false }).eq("id", dueno.id);
+    // El vendedor no puede cambiar ese permiso.
+    await vendedor.cliente.from("perfiles").update({ vendedores_ven_costos: true }).eq("id", dueno.id);
+    expect((await vendedor.cliente.from("autos_resumen").select("precio_compra").eq("id", autoDelDueno).single()).data?.precio_compra).toBeNull();
+  });
+
+  it("un extraño tampoco ve el negocio por las vistas", async () => {
+    const { extrano } = usuarios;
+    expect((await extrano.cliente.from("autos_resumen").select("id")).data).toEqual([]);
+    expect((await extrano.cliente.from("gastos_vista").select("id")).data).toEqual([]);
+  });
+
   it("storage: el vendedor sube a la carpeta del negocio pero no borra", async () => {
     const { dueno, vendedor } = usuarios;
     const ruta = `${dueno.id}/${autoDelDueno}/vendedor.jpg`;
@@ -107,7 +143,7 @@ describe.skipIf(!hayDb)("equipo", () => {
     const { dueno, vendedor } = usuarios;
     await plan(dueno.id, "pro");
     expect((await vendedor.cliente.from("autos").select("id")).data).toEqual([]);
-    expect((await vendedor.cliente.rpc("mi_contexto")).data).toEqual({ cuenta_id: vendedor.id, rol: "dueno" });
+    expect((await vendedor.cliente.rpc("mi_contexto")).data).toMatchObject({ cuenta_id: vendedor.id, rol: "dueno" });
     await plan(dueno.id, "concesionario");
     expect((await vendedor.cliente.from("autos").select("id")).data!.length).toBeGreaterThan(0);
   });

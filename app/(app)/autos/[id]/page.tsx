@@ -58,7 +58,7 @@ const estilosVencimiento = {
 export default async function FichaAuto({ params, searchParams }: PageProps<"/autos/[id]">) {
   const { id } = await params;
   const { nuevo, aviso } = await searchParams;
-  const { cuentaId, esDueno } = await requerirUsuario();
+  const { cuentaId, esDueno, verCostos } = await requerirUsuario();
   const [{ auto, gastos, documentos, fotos, vendedor, comprador }, perfil] = await Promise.all([obtenerAuto(id), obtenerPerfil()]);
   const hoy = hoyLima();
   const c = calcularAuto(auto, hoy);
@@ -99,6 +99,21 @@ export default async function FichaAuto({ params, searchParams }: PageProps<"/au
 
       <GaleriaFotos autoId={id} cuentaId={cuentaId} fotos={fotos} puedeBorrar={esDueno} />
 
+      {!verCostos ? (
+        <Tarjeta>
+          <dl className="grid grid-cols-2 gap-x-4 gap-y-3 sm:grid-cols-3">
+            <Dato
+              etiqueta={vendido ? "Precio de venta" : "Precio de venta objetivo"}
+              valor={<span className="text-xl font-black">{soles(vendido ? auto.precio_venta_final : auto.precio_venta_objetivo)}</span>}
+            />
+            <Dato
+              etiqueta={vendido ? "Días hasta vender" : "Días en stock"}
+              valor={c.diasEnStock === null ? "—" : `${c.diasEnStock} ${c.diasEnStock === 1 ? "día" : "días"}`}
+            />
+            <Dato etiqueta={vendido ? "Fecha de venta" : "Fecha de compra"} valor={fecha(vendido ? auto.fecha_venta : auto.fecha_compra)} />
+          </dl>
+        </Tarjeta>
+      ) : (
       <Tarjeta className="space-y-4">
         <div className="text-center">
           <p className="text-sm font-semibold text-slate-500">{vendido ? "Ganancia real" : "Ganancia proyectada"}</p>
@@ -124,6 +139,7 @@ export default async function FichaAuto({ params, searchParams }: PageProps<"/au
           <Dato etiqueta={vendido ? "Fecha de venta" : "Fecha de compra"} valor={fecha(vendido ? auto.fecha_venta : auto.fecha_compra)} />
         </dl>
       </Tarjeta>
+      )}
 
       {vendido ? (
         <Tarjeta className="flex flex-wrap items-center justify-between gap-3 bg-emerald-50 ring-emerald-200">
@@ -160,7 +176,7 @@ export default async function FichaAuto({ params, searchParams }: PageProps<"/au
         </div>
       )}
 
-      <Seccion titulo={`Gastos · ${soles(Number(auto.total_gastos))}`}>
+      <Seccion titulo={verCostos ? `Gastos · ${soles(Number(auto.total_gastos))}` : "Gastos"}>
         {gastos.length > 0 && (
           <Tarjeta className="divide-y divide-slate-100 p-0">
             {gastos.map((g) => (
@@ -172,13 +188,13 @@ export default async function FichaAuto({ params, searchParams }: PageProps<"/au
                   </p>
                   <p className="text-sm text-slate-500">{fecha(g.fecha)}</p>
                 </div>
-                <p className={cx("font-bold whitespace-nowrap", !esDueno && "pr-3")}>{soles(g.monto)}</p>
+                {verCostos && <p className={cx("font-bold whitespace-nowrap", !esDueno && "pr-3")}>{soles(g.monto)}</p>}
                 {esDueno && (
                 <BotonConfirmar
                   accion={eliminarGasto}
                   campos={{ id: g.id, auto_id: id }}
                   mensaje="¿Eliminar este gasto?"
-                  etiqueta={`Eliminar gasto de ${soles(g.monto)}`}
+                  etiqueta={`Eliminar gasto ${ETIQUETA_CATEGORIA[g.categoria as CategoriaGasto]}`}
                 >
                   <Trash2 className="size-5" aria-hidden />
                 </BotonConfirmar>

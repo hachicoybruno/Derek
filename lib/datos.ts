@@ -17,7 +17,7 @@ export type AutoResumen = Database["public"]["Views"]["autos_resumen"]["Row"] & 
   anio: number;
   estado: Estado;
 };
-export type Gasto = Database["public"]["Tables"]["gastos"]["Row"];
+export type Gasto = Database["public"]["Views"]["gastos_vista"]["Row"];
 export type Documento = Database["public"]["Tables"]["documentos"]["Row"];
 export type Contacto = Database["public"]["Tables"]["contactos"]["Row"];
 export type Foto = Database["public"]["Tables"]["fotos"]["Row"] & { url: string | null; urlMiniatura: string | null };
@@ -120,7 +120,7 @@ export async function obtenerAuto(id: string) {
 
   const [autoR, gastosR, docsR, fotosR] = await Promise.all([
     supabase.from("autos_resumen").select("*").eq("id", id).maybeSingle(),
-    supabase.from("gastos").select("*").eq("auto_id", id).order("fecha", { ascending: false }).order("created_at", { ascending: false }),
+    supabase.from("gastos_vista").select("*").eq("auto_id", id).order("fecha", { ascending: false }).order("created_at", { ascending: false }),
     supabase.from("documentos").select("*").eq("auto_id", id).order("fecha_vencimiento", { ascending: true, nullsFirst: false }),
     supabase.from("fotos").select("*").eq("auto_id", id).order("orden").order("created_at"),
   ]);

@@ -15,13 +15,14 @@ function fechaExcel(iso: string | null) {
   return new Date(Date.UTC(a, m - 1, d));
 }
 
-export async function excelDeAutos(autos: AutoResumen[], hoy: string): Promise<ArrayBuffer> {
+export async function excelDeAutos(autos: AutoResumen[], hoy: string, verCostos = true): Promise<ArrayBuffer> {
   const libro = new ExcelJS.Workbook();
   libro.creator = "FLIPDESK";
   libro.created = new Date();
   const hoja = libro.addWorksheet("Autos", { views: [{ state: "frozen", ySplit: 1 }] });
 
-  hoja.columns = [
+  const COSTOS = new Set(["precio_compra", "gastos", "costo", "ganancia", "margen"]);
+  const columnas = [
     { header: "Placa", key: "placa", width: 11 },
     { header: "Marca", key: "marca", width: 14 },
     { header: "Modelo", key: "modelo", width: 16 },
@@ -38,6 +39,7 @@ export async function excelDeAutos(autos: AutoResumen[], hoy: string): Promise<A
     { header: "Margen %", key: "margen", width: 10, style: { numFmt: '0.0"%"' } },
     { header: "Días en stock", key: "dias", width: 12 },
   ];
+  hoja.columns = verCostos ? columnas : columnas.filter((c) => !COSTOS.has(c.key));
 
   for (const a of autos) {
     const c = calcularAuto(a, hoy);
@@ -66,7 +68,7 @@ export async function excelDeAutos(autos: AutoResumen[], hoy: string): Promise<A
   encabezado.alignment = { vertical: "middle" };
   encabezado.height = 22;
 
-  if (autos.length) {
+  if (autos.length && verCostos) {
     const ultima = autos.length + 1;
     const total = hoja.addRow({ placa: "TOTAL" });
     for (const col of ["G", "H", "I", "M"]) {

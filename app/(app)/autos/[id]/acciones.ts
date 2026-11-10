@@ -165,7 +165,11 @@ export async function generarAnuncios(autoId: string): Promise<{ anuncios?: Anun
   const { supabase } = await requerirUsuario();
   if (!esUUID(autoId)) return { error: "Auto no válido." };
   const [autoR, docsR] = await Promise.all([
-    supabase.from("autos").select("*").eq("id", autoId).single(),
+    supabase
+      .from("autos")
+      .select("marca, modelo, anio, version, color, kilometraje, transmision, combustible, precio_venta_objetivo, precio_venta_final, notas")
+      .eq("id", autoId)
+      .single(),
     supabase.from("documentos").select("tipo, fecha_vencimiento").eq("auto_id", autoId),
   ]);
   const a = autoR.data;

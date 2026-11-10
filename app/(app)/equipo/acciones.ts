@@ -80,3 +80,10 @@ export async function aceptarInvitacion(_: { error?: string }, formData: FormDat
   revalidatePath("/", "layout");
   redirect("/dashboard?bienvenida=equipo");
 }
+
+export async function cambiarVisibilidadCostos(formData: FormData) {
+  const { supabase, userId, esDueno } = await requerirUsuario();
+  if (!esDueno) return;
+  await supabase.from("perfiles").update({ vendedores_ven_costos: formData.get("ver") === "si" }).eq("id", userId);
+  revalidatePath("/", "layout");
+}

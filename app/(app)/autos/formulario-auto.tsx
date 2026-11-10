@@ -22,10 +22,13 @@ export function FormularioAuto({
   auto,
   hoy,
   inicial = {},
+  verCostos = true,
 }: {
   auto?: ValoresAuto & { id?: string };
   hoy: string;
   inicial?: Record<string, string>;
+  /** Si es false y se está editando, no se muestra ni se modifica el precio de compra. */
+  verCostos?: boolean;
 }) {
   const [estado, accion] = useActionState<EstadoFormulario, FormData>(guardarAuto, {});
   const editando = Boolean(auto?.id);
@@ -104,9 +107,13 @@ export function FormularioAuto({
       </datalist>
 
       <div className="grid grid-cols-2 gap-3">
+        {editando && !verCostos ? (
+          <input type="hidden" name="omitir_precio_compra" value="1" />
+        ) : (
         <Campo etiqueta={comprado ? "Precio de compra" : "Precio pedido"} error={e.precio_compra}>
           <EntradaSoles name="precio_compra" placeholder="30,000" defaultValue={v("precio_compra")} aria-invalid={Boolean(e.precio_compra)} />
         </Campo>
+        )}
         <Campo etiqueta="Fecha de compra" error={e.fecha_compra}>
           <Entrada
             name="fecha_compra"

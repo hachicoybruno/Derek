@@ -9,6 +9,7 @@ import { listarAutos, listarVencimientos, obtenerMiPerfil } from "@/lib/datos";
 import { hoyLima } from "@/lib/fechas";
 import { formatoPlaca, porcentaje, soles, solesConSigno } from "@/lib/formato";
 import { obtenerSuscripcion } from "@/lib/suscripcion";
+import { requerirUsuario } from "@/lib/auth";
 import { FuncionPro } from "@/components/aviso-suscripcion";
 
 export const metadata: Metadata = { title: "Inicio" };
@@ -27,7 +28,13 @@ function Kpi({ titulo, valor, detalle, className }: { titulo: string; valor: Rea
 
 export default async function Dashboard({ searchParams }: PageProps<"/dashboard">) {
   const { bienvenida } = await searchParams;
-  const [autos, venc, perfil, suscripcion] = await Promise.all([listarAutos(), listarVencimientos(), obtenerMiPerfil(), obtenerSuscripcion()]);
+  const [autos, venc, perfil, suscripcion, { verCostos }] = await Promise.all([
+    listarAutos(),
+    listarVencimientos(),
+    obtenerMiPerfil(),
+    obtenerSuscripcion(),
+    requerirUsuario(),
+  ]);
   const completo = Boolean(suscripcion.info?.dashboardCompleto);
   // Las alertas de vencimiento son parte de los planes Pro y Concesionario.
   const documentos = suscripcion.info?.alertas ? venc.documentos : [];
@@ -79,12 +86,14 @@ export default async function Dashboard({ searchParams }: PageProps<"/dashboard"
       ) : (
         <>
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+            {verCostos && (
             <Kpi
               className="col-span-2 lg:col-span-1"
               titulo={`Ganancia de ${mes}`}
               valor={<span className={colorGanancia(r.gananciaMes || null)}>{solesConSigno(r.gananciaMes, { redondear: true })}</span>}
               detalle={`${r.vendidosMes} ${r.vendidosMes === 1 ? "auto vendido" : "autos vendidos"} · ventas ${soles(r.ventasMes, { redondear: true })}`}
             />
+            )}
             <Kpi
               titulo="Autos en stock"
               valor={
@@ -101,7 +110,7 @@ export default async function Dashboard({ searchParams }: PageProps<"/dashboard"
               detalle={r.diasPromedioStock === null ? undefined : "días"}
             />
             )}
-            {completo && (
+            {completo && verCostos && (
             <Kpi
               className="col-span-2 lg:col-span-1"
               titulo="Capital inmovilizado"
@@ -137,7 +146,7 @@ export default async function Dashboard({ searchParams }: PageProps<"/dashboard"
             </Seccion>
           )}
 
-          {completo && (
+          {completo && verCostos && (
           <Seccion titulo="Margen por marca y modelo">
             {r.porModelo.length === 0 ? (
               <Tarjeta className="text-slate-600">Cuando vendas tu primer auto verás aquí qué modelos te dejan más ganancia.</Tarjeta>

@@ -14,7 +14,7 @@ export const requerirUsuario = cache(async () => {
   if (!claims?.sub) redirect("/login");
   // Cuenta (negocio) con la que trabaja: la propia (dueño) o la del dueño si es vendedor.
   const { data: ctx } = await supabase.rpc("mi_contexto");
-  const contexto = (ctx ?? {}) as { cuenta_id?: string; rol?: string };
+  const contexto = (ctx ?? {}) as { cuenta_id?: string; rol?: string; ver_costos?: boolean };
   const rol: Rol = contexto.rol === "vendedor" ? "vendedor" : "dueno";
   return {
     supabase,
@@ -22,6 +22,8 @@ export const requerirUsuario = cache(async () => {
     cuentaId: contexto.cuenta_id ?? claims.sub,
     rol,
     esDueno: rol === "dueno",
+    /** Puede ver precio de compra, gastos, costos y ganancias (dueño, o vendedor si el dueño lo permite). */
+    verCostos: rol === "dueno" || Boolean(contexto.ver_costos),
     email: (claims.email as string | undefined) ?? "",
   };
 });

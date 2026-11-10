@@ -5,7 +5,7 @@ import type { AutoResumen } from "@/lib/datos";
 import { formatoPlaca, solesConSigno, soles, porcentaje } from "@/lib/formato";
 import { BadgeEstado, colorGanancia } from "./badges";
 
-export function TarjetaAuto({ auto, hoy, miniatura }: { auto: AutoResumen; hoy: string; miniatura?: string }) {
+export function TarjetaAuto({ auto, hoy, miniatura, verCostos = true }: { auto: AutoResumen; hoy: string; miniatura?: string; verCostos?: boolean }) {
   const c = calcularAuto(auto, hoy);
   const vendido = auto.estado === "vendido";
   const ganancia = vendido ? c.ganancia : c.gananciaProyectada;
@@ -33,10 +33,17 @@ export function TarjetaAuto({ auto, hoy, miniatura }: { auto: AutoResumen; hoy: 
         </div>
         <p className="font-mono text-sm font-semibold tracking-wider text-slate-600">{formatoPlaca(auto.placa)}</p>
         <div className="flex flex-wrap items-baseline gap-x-4 gap-y-0.5 text-sm">
-          <span className="text-slate-600">
-            Costo <strong className="text-slate-900">{soles(c.costoTotal, { redondear: true })}</strong>
-          </span>
-          {ganancia !== null && (
+          {verCostos ? (
+            <span className="text-slate-600">
+              Costo <strong className="text-slate-900">{soles(c.costoTotal, { redondear: true })}</strong>
+            </span>
+          ) : (
+            <span className="text-slate-600">
+              {vendido ? "Vendido en" : "Precio"}{" "}
+              <strong className="text-slate-900">{soles(vendido ? auto.precio_venta_final : auto.precio_venta_objetivo, { redondear: true })}</strong>
+            </span>
+          )}
+          {verCostos && ganancia !== null && (
             <span className={colorGanancia(ganancia)}>
               {vendido ? "Ganancia" : "Proyectada"}{" "}
               <strong>{solesConSigno(ganancia, { redondear: true })}</strong>

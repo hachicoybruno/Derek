@@ -81,7 +81,7 @@ describe.skipIf(!disponible)("RLS: cada usuario ve solo sus datos", () => {
   it("B no puede modificar ni borrar el auto de A", async () => {
     await b.cliente.from("autos").update({ precio_compra: 1 }).eq("id", autoDeA);
     await b.cliente.from("autos").delete().eq("id", autoDeA);
-    const { data } = await a.cliente.from("autos").select("precio_compra").eq("id", autoDeA).single();
+    const { data } = await a.cliente.from("autos_resumen").select("precio_compra").eq("id", autoDeA).single();
     expect(Number(data?.precio_compra)).toBe(30000);
   });
 

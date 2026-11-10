@@ -150,7 +150,7 @@ PayPal muestra dos botones: **PayPal** y **Tarjeta de débito o crédito** (sin 
 ### Equipo (plan Concesionario)
 
 - El **dueño** invita vendedores desde **Ajustes → Equipo** (hasta 4 vendedores, 5 usuarios en total). El enlace se puede copiar, mandar por WhatsApp o, si Resend está configurado, llega por correo. Vence en 7 días y solo lo puede aceptar el correo invitado.
-- El **vendedor** ve y registra autos, fotos, gastos, documentos y ventas del negocio, crea anuncios y contratos. **No puede** eliminar registros, ni cambiar plantillas, datos del negocio, suscripción o equipo. Esto se valida también en la base de datos (RLS).
+- El **vendedor** ve y registra autos, fotos, gastos, documentos y ventas del negocio, crea anuncios y contratos. **Por defecto no ve precios de compra, montos de gastos ni ganancias** (el dueño puede permitirlo en Equipo → Costos y ganancias). **No puede** eliminar registros, ni cambiar plantillas, datos del negocio, suscripción o equipo. Esto se valida también en la base de datos (RLS).
 - Si el negocio deja el plan Concesionario, los vendedores pierden el acceso automáticamente (sus cuentas siguen existiendo).
 
 ### Alertas por correo y WhatsApp (planes Pro y Concesionario)

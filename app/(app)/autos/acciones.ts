@@ -29,7 +29,7 @@ export type EstadoFormulario = {
   limitePlan?: boolean;
 };
 
-function esquemaAuto(hoy: string) {
+function esquemaAuto(hoy: string, omitirPrecioCompra = false) {
   const anioMax = Number(hoy.slice(0, 4)) + 1;
   return z
     .object({
@@ -54,7 +54,7 @@ function esquemaAuto(hoy: string) {
     })
     .superRefine((d, ctx) => {
       const comprado = d.estado !== "en_evaluacion";
-      if (comprado && d.precio_compra === undefined)
+      if (comprado && d.precio_compra === undefined && !omitirPrecioCompra)
         ctx.addIssue({ code: "custom", path: ["precio_compra"], message: "Ingresa el precio de compra." });
       if (comprado && !d.fecha_compra)
         ctx.addIssue({ code: "custom", path: ["fecha_compra"], message: "Ingresa la fecha de compra." });
@@ -83,7 +83,9 @@ export async function guardarAuto(_: EstadoFormulario, formData: FormData): Prom
   const { supabase } = await requerirUsuario();
   const valores = valoresDe(formData);
   const id = formData.get("id");
-  const datos = esquemaAuto(hoyLima()).safeParse(Object.fromEntries(formData));
+  // Un vendedor sin acceso a costos edita el auto sin ver ni tocar el precio de compra.
+  const omitirPrecioCompra = esUUID(id) && formData.get("omitir_precio_compra") === "1";
+  const datos = esquemaAuto(hoyLima(), omitirPrecioCompra).safeParse(Object.fromEntries(formData));
   if (!datos.success) return { errores: erroresPorCampo(datos.error), valores };
 
   const d = datos.data;
@@ -111,7 +113,9 @@ export async function guardarAuto(_: EstadoFormulario, formData: FormData): Prom
 
   let autoId: string;
   if (esUUID(id)) {
-    const { error } = await supabase.from("autos").update(fila).eq("id", id);
+    const { precio_compra, ...sinPrecio } = fila;
+    const cambios = omitirPrecioCompra ? sinPrecio : { ...sinPrecio, precio_compra };
+    const { error } = await supabase.from("autos").update(cambios).eq("id", id);
     if (error) return { ...mensajeErrorBD(error), valores };
     autoId = id;
   } else {

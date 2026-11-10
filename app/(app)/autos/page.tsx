@@ -8,6 +8,7 @@ import { BotonDatosEjemplo } from "@/components/boton-datos-ejemplo";
 import { listarAutos, miniaturasDeAutos } from "@/lib/datos";
 import { ESTADOS, ETIQUETA_ESTADO, esEstado } from "@/lib/dominio";
 import { hoyLima } from "@/lib/fechas";
+import { requerirUsuario } from "@/lib/auth";
 
 export const metadata: Metadata = { title: "Mis autos" };
 
@@ -16,7 +17,7 @@ export default async function Autos({ searchParams }: PageProps<"/autos">) {
   const q = typeof params.q === "string" ? params.q : "";
   const estado = typeof params.estado === "string" && esEstado(params.estado) ? params.estado : undefined;
 
-  const autos = await listarAutos({ estado, q });
+  const [autos, { verCostos }] = await Promise.all([listarAutos({ estado, q }), requerirUsuario()]);
   const miniaturas = await miniaturasDeAutos(autos.map((a) => a.id));
   const hoy = hoyLima();
   const filtrado = Boolean(q || estado);
@@ -109,7 +110,7 @@ export default async function Autos({ searchParams }: PageProps<"/autos">) {
         <ul className="grid gap-3 md:grid-cols-2">
           {autos.map((auto) => (
             <li key={auto.id}>
-              <TarjetaAuto auto={auto} hoy={hoy} miniatura={miniaturas.get(auto.id)} />
+              <TarjetaAuto auto={auto} hoy={hoy} miniatura={miniaturas.get(auto.id)} verCostos={verCostos} />
             </li>
           ))}
         </ul>
