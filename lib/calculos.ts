@@ -179,3 +179,13 @@ export function resumenDashboard(
     porModelo,
   };
 }
+
+export type EstadoVencimiento = "vencido" | "por_vencer" | "vigente";
+
+/** Estado de un documento según su fecha de vencimiento (aviso con 30 días). */
+export function estadoVencimiento(fechaVencimiento: string | null, hoy: string, diasAviso = 30) {
+  if (!fechaVencimiento) return null;
+  const dias = diasEntre(hoy, fechaVencimiento);
+  const estado: EstadoVencimiento = dias < 0 ? "vencido" : dias <= diasAviso ? "por_vencer" : "vigente";
+  return { estado, dias };
+}

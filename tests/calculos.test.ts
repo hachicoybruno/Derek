@@ -139,3 +139,15 @@ describe("resumenDashboard", () => {
     expect(r.porModelo[0].margenPromedio).toBe(12.43); // (10 + 14.86) / 2
   });
 });
+
+import { estadoVencimiento } from "@/lib/calculos";
+
+describe("estadoVencimiento", () => {
+  it("clasifica vencido / por vencer / vigente", () => {
+    expect(estadoVencimiento("2026-11-08", "2026-11-09")).toEqual({ estado: "vencido", dias: -1 });
+    expect(estadoVencimiento("2026-11-09", "2026-11-09")).toEqual({ estado: "por_vencer", dias: 0 });
+    expect(estadoVencimiento("2026-12-09", "2026-11-09")).toEqual({ estado: "por_vencer", dias: 30 });
+    expect(estadoVencimiento("2026-12-10", "2026-11-09")).toEqual({ estado: "vigente", dias: 31 });
+    expect(estadoVencimiento(null, "2026-11-09")).toBeNull();
+  });
+});
