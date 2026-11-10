@@ -89,6 +89,20 @@ isOneToOne: false
       referencedColumns: ["id","user_id"]
     }
                   ]
+                },"eventos_pago": {
+                  Row: {
+                    "id": string,"payload": NonNullable<Json>,"proveedor": string,"recibido_at": string,"tipo": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "id": string,"payload": NonNullable<Json>,"proveedor": string,"recibido_at"?: string,"tipo": string
+                  }
+                  Update: {
+                    "id"?: string,"payload"?: NonNullable<Json>,"proveedor"?: string,"recibido_at"?: string,"tipo"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
                 },"fotos": {
                   Row: {
                     "auto_id": string,"created_at": string,"id": string,"orden": number,"path": string,"path_miniatura": string | null,"user_id": string
@@ -141,6 +155,20 @@ isOneToOne: false
       referencedColumns: ["id","user_id"]
     }
                   ]
+                },"pagos": {
+                  Row: {
+                    "created_at": string,"estado": string,"fecha": string,"id": string,"moneda": string,"monto": number,"plan": string | null,"proveedor": string,"proveedor_pago_id": string,"proveedor_suscripcion_id": string | null,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"estado": string,"fecha"?: string,"id"?: string,"moneda": string,"monto": number,"plan"?: string | null,"proveedor": string,"proveedor_pago_id": string,"proveedor_suscripcion_id"?: string | null,"user_id": string
+                  }
+                  Update: {
+                    "created_at"?: string,"estado"?: string,"fecha"?: string,"id"?: string,"moneda"?: string,"monto"?: number,"plan"?: string | null,"proveedor"?: string,"proveedor_pago_id"?: string,"proveedor_suscripcion_id"?: string | null,"user_id"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
                 },"perfiles": {
                   Row: {
                     "ciudad": string,"created_at": string,"direccion": string | null,"dni": string | null,"id": string,"negocio": string | null,"nombre": string | null,"telefono": string | null,"umbral_amarillo": number,"umbral_verde": number,"updated_at": string
@@ -165,6 +193,20 @@ isOneToOne: false
                   }
                   Update: {
                     "contenido"?: string,"created_at"?: string,"id"?: string,"tipo"?: string,"updated_at"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"suscripciones": {
+                  Row: {
+                    "created_at": string,"estado": string,"periodo_hasta": string | null,"plan": string,"proveedor": string | null,"proveedor_suscripcion_id": string | null,"prueba_hasta": string | null,"updated_at": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"estado"?: string,"periodo_hasta"?: string | null,"plan"?: string,"proveedor"?: string | null,"proveedor_suscripcion_id"?: string | null,"prueba_hasta"?: string | null,"updated_at"?: string,"user_id": string
+                  }
+                  Update: {
+                    "created_at"?: string,"estado"?: string,"periodo_hasta"?: string | null,"plan"?: string,"proveedor"?: string | null,"proveedor_suscripcion_id"?: string | null,"prueba_hasta"?: string | null,"updated_at"?: string,"user_id"?: string
                   }
                   Relationships: [
                     
@@ -197,6 +239,9 @@ isOneToOne: false
           Functions: {
             "hoy_lima":
 { Args: Record<PropertyKey, never>; Returns: string
+                           },
+"plan_efectivo":
+{ Args: { "uid": string }; Returns: string
                            }
           }
           Enums: {
