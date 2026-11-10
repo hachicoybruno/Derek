@@ -39,3 +39,21 @@ export function esFechaISO(valor: string): boolean {
   const d = new Date(`${valor}T00:00:00Z`);
   return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === valor;
 }
+
+const MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
+
+/** "2026-11-09" → "9 de noviembre de 2026". */
+export function fechaLarga(iso: string | null | undefined): string {
+  if (!iso || !esFechaISO(iso.slice(0, 10))) return "";
+  const [a, m, d] = iso.slice(0, 10).split("-").map(Number);
+  return `${d} de ${MESES[m - 1]} de ${a}`;
+}
+
+export function nombreMes(iso: string): string {
+  return MESES[Number(iso.slice(5, 7)) - 1];
+}
+
+/** Hora actual en Lima "HH:MM". */
+export function horaLima(ahora: Date = new Date()): string {
+  return new Intl.DateTimeFormat("en-GB", { timeZone: ZONA_HORARIA, hour: "2-digit", minute: "2-digit", hour12: false }).format(ahora);
+}

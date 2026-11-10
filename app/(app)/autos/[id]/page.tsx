@@ -7,7 +7,7 @@ import { BotonEnviar } from "@/components/boton-enviar";
 import { Aviso, BotonLink, cx, Dato, Seccion, Tarjeta } from "@/components/ui";
 import { requerirUsuario } from "@/lib/auth";
 import { calcularAuto, estadoVencimiento } from "@/lib/calculos";
-import { obtenerAuto } from "@/lib/datos";
+import { obtenerAuto, obtenerPerfil } from "@/lib/datos";
 import {
   ETIQUETA_CATEGORIA,
   ETIQUETA_COMBUSTIBLE,
@@ -17,13 +17,14 @@ import {
   type CategoriaGasto,
   type TipoDocumento,
 } from "@/lib/dominio";
-import { hoyLima } from "@/lib/fechas";
+import { horaLima, hoyLima } from "@/lib/fechas";
 import { fecha, formatoPlaca, km, porcentaje, soles, solesConSigno } from "@/lib/formato";
 import { cambiarEstado } from "../acciones";
 import { eliminarDocumento, eliminarGasto } from "./acciones";
 import { FormularioContacto, FormularioDocumento, FormularioGasto, FormularioVenta } from "./formularios";
 import { GaleriaFotos } from "./galeria-fotos";
 import { GeneradorAnuncios } from "./generador-anuncios";
+import { DocumentosPdf } from "./documentos-pdf";
 
 export async function generateMetadata({ params }: PageProps<"/autos/[id]">): Promise<Metadata> {
   const { id } = await params;
@@ -57,7 +58,7 @@ export default async function FichaAuto({ params, searchParams }: PageProps<"/au
   const { id } = await params;
   const { nuevo } = await searchParams;
   const { userId } = await requerirUsuario();
-  const { auto, gastos, documentos, fotos, vendedor, comprador } = await obtenerAuto(id);
+  const [{ auto, gastos, documentos, fotos, vendedor, comprador }, perfil] = await Promise.all([obtenerAuto(id), obtenerPerfil()]);
   const hoy = hoyLima();
   const c = calcularAuto(auto, hoy);
   const vendido = auto.estado === "vendido";
@@ -247,6 +248,20 @@ export default async function FichaAuto({ params, searchParams }: PageProps<"/au
             {auto.notas && <Dato etiqueta="Notas" valor={<span className="font-normal whitespace-pre-line">{auto.notas}</span>} className="col-span-full" />}
           </dl>
         </Tarjeta>
+      </Seccion>
+
+      <Seccion titulo="Contratos y recibos">
+        <DocumentosPdf
+          autoId={id}
+          hoy={hoy}
+          hora={horaLima()}
+          precio={auto.precio_venta_final ?? auto.precio_venta_objetivo}
+          fechaVenta={auto.fecha_venta}
+          kilometraje={auto.kilometraje}
+          yo={{ nombre: perfil.nombre, dni: perfil.dni, direccion: perfil.direccion, telefono: perfil.telefono }}
+          propietario={vendedor}
+          comprador={comprador}
+        />
       </Seccion>
 
       <div className="grid gap-6 md:grid-cols-2">

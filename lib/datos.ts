@@ -7,6 +7,7 @@ import { DOCUMENTOS_CON_VENCIMIENTO, esEstado, type Estado } from "./dominio";
 import { hoyLima, sumarDias } from "./fechas";
 import { normalizarPlaca } from "./formato";
 import type { Database } from "./supabase/tipos-db";
+import { PLANTILLAS_BASE, type TipoPlantilla } from "./documentos/plantillas-base";
 
 export type AutoResumen = Database["public"]["Views"]["autos_resumen"]["Row"] & {
   id: string;
@@ -169,4 +170,11 @@ export const listarVencimientos = cache(async (dias = DIAS_AVISO_VENCIMIENTO) =>
 export async function contarAlertasVencimiento() {
   const { documentos } = await listarVencimientos();
   return documentos.length;
+}
+
+/** Plantilla del usuario o, si no la editó, la original. */
+export async function obtenerPlantilla(tipo: TipoPlantilla) {
+  const { supabase } = await requerirUsuario();
+  const { data } = await supabase.from("plantillas").select("contenido, updated_at").eq("tipo", tipo).maybeSingle();
+  return { contenido: data?.contenido ?? PLANTILLAS_BASE[tipo], editada: Boolean(data), actualizada: data?.updated_at ?? null };
 }
