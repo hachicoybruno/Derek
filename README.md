@@ -64,6 +64,15 @@ Con `npm run dev` corriendo y el usuario demo cargado (`npm run seed`), abre htt
 9. **PWA:** con `npm run build && npm start`, Chrome ofrece "Instalar app"; sin conexión aparece la página "Estás sin conexión".
 10. **Cuenta nueva:** regístrate con otro correo, no verás los autos del demo (RLS). Usa "Cargar 5 autos de ejemplo".
 
+## Cómo probar la Fase 2 (documentos)
+
+1. **Ajustes (⚙️):** completa tu nombre, DNI y dirección (aparecen cuando tú vendes).
+2. Abre la ficha del **Toyota Yaris (DEM-101)**, que ya tiene comprador → sección **Contratos y recibos**.
+3. **Contrato de compraventa** → revisa precio, fecha y forma de pago → **Generar PDF** (se abre en otra pestaña; en el celular se puede compartir o imprimir).
+4. Genera el **Recibo** (prueba concepto "separación del vehículo" y otro monto) y la **Constancia de entrega**.
+5. Cambia "¿Quién vende?" a **Dueño anterior** para que firme el vendedor registrado en la ficha.
+6. **Plantillas** (desde Ajustes o desde el aviso de la ficha): edita el recibo, inserta datos con los botones, usa **Vista previa**, guarda y vuelve a generar el PDF. Luego **Restaurar plantilla original**.
+
 ## Variables de entorno
 
 Ver [`.env.example`](.env.example). Nunca subas claves al repositorio.

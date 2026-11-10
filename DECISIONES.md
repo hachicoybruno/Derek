@@ -47,3 +47,20 @@ Registro de decisiones tomadas cuando algo era ambiguo. Se eligió siempre la op
 | N20 | **Máximo 20 fotos por auto** (10 MB por archivo antes de comprimir). |
 | N21 | **Los anuncios no muestran la placa** y el precio usado es el objetivo. Se indica "SOAT/revisión vigente" solo si hay un documento con fecha futura. |
 | N22 | **Exportar a Excel** descarga los autos con el filtro y la búsqueda que se ven en pantalla, con una fila de totales. |
+
+## Fase 2 — Documentos
+
+| # | Decisión |
+|---|----------|
+| D1 | **PDF generado en el servidor con `pdf-lib`** (JavaScript puro, sin Chrome ni binarios nativos; funciona en Vercel). Los PDF no se guardan: se generan al momento con los datos actuales. |
+| D2 | **Plantillas en texto plano con variables `{{grupo.dato}}`** y un formato mínimo (`#`, `##`, `-`, `[[FIRMAS]]`). Es fácil de editar desde el celular, sin un editor visual pesado. |
+| D3 | **Una plantilla por tipo y por usuario** (tabla `plantillas`). Si el usuario no editó una, se usa la original del código; "Restaurar" borra la versión del usuario. |
+| D4 | **El aviso "Plantilla referencial, revisar con un abogado" no se puede quitar:** está en el editor, en la sección de la ficha y al pie de cada página del PDF (fuera del texto editable). |
+| D5 | **Dato faltante = línea en blanco** (`______________`) para completarlo a mano. No se bloquea la generación. |
+| D6 | **"¿Quién vende?":** el usuario (datos de Ajustes) o el dueño anterior (vendedor registrado en la ficha). Muchos revendedores venden sin haber transferido el auto a su nombre. |
+| D7 | **Número de recibo automático** = fecha + placa (`20261109-ABC123`). No se lleva un correlativo en la base de datos (evita estado extra); se puede cambiar en la plantilla. |
+| D8 | **Montos en letras** al estilo peruano: `TREINTA Y SIETE MIL QUINIENTOS CON 00/100 SOLES`. |
+| D9 | **El contrato menciona la transferencia ante notario e inscripción en SUNARP,** porque en Perú el contrato privado no reemplaza ese trámite. |
+| D10 | **Fuentes estándar del PDF (Helvetica):** cubren tildes, ñ, ¿ ¡ y °. Los emojis y símbolos fuera de Latin-1 se eliminan al generar el PDF. |
+| D11 | **El último párrafo nunca queda separado de las firmas;** si no entran juntos, pasan a la página siguiente. |
+| D12 | **La vista previa del editor usa datos ficticios** y el texto aún sin guardar. |
